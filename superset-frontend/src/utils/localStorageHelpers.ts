@@ -55,6 +55,7 @@ export enum LocalStorageKeys {
   dashboard__custom_filter_bar_widths = 'dashboard__custom_filter_bar_widths',
   dashboard__explore_context = 'dashboard__explore_context',
   common__resizable_sidebar_widths = 'common__resizable_sidebar_widths',
+  custom_routes = 'custom_routes',
 }
 
 export type LocalStorageValues = {
@@ -74,6 +75,7 @@ export type LocalStorageValues = {
   dashboard__custom_filter_bar_widths: Record<string, number>;
   dashboard__explore_context: Record<string, DashboardContextForExplore>;
   common__resizable_sidebar_widths: Record<string, number>;
+  custom_routes: Record<string, boolean>;
 };
 
 /*

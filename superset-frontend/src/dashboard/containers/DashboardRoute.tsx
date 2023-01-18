@@ -18,11 +18,23 @@
  */
 import React, { FC } from 'react';
 import { useParams } from 'react-router-dom';
+import { LocalStorageKeys, setItem } from '../../utils/localStorageHelpers';
 import { DashboardPage } from './DashboardPage';
 
-const DashboardRoute: FC = () => {
+interface DashboardRouteProps {
+  id?: string;
+  home?: boolean;
+}
+
+const DashboardRoute: FC<DashboardRouteProps> = ({
+  id,
+  home,
+}: DashboardRouteProps) => {
   const { idOrSlug } = useParams<{ idOrSlug: string }>();
-  return <DashboardPage idOrSlug={idOrSlug} />;
+
+  setItem(LocalStorageKeys.custom_routes, { home: home || false });
+
+  return <DashboardPage idOrSlug={id || idOrSlug} />;
 };
 
 export default DashboardRoute;

@@ -74,7 +74,7 @@ setup(
     install_requires=[
         "backoff>=1.8.0",
         "bleach>=3.0.2, <4.0.0",
-        "cachelib>=0.4.1,<0.5",
+        "cachelib",
         "celery>=5.2.2, <6.0.0",
         "click>=8.0.3",
         "colorama",
@@ -84,7 +84,7 @@ setup(
         "deprecation>=2.1.0, <2.2.0",
         "flask>=2.0.0, <3.0.0",
         "flask-appbuilder>=4.1.6, <5.0.0",
-        "flask-caching>=1.10.0",
+        "flask-caching@ git+https://github.com/pallets-eco/flask-caching@master",
         "flask-compress",
         "flask-talisman",
         "flask-migrate",
