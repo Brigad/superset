@@ -78,6 +78,7 @@ import {
 import { getRootLevelTabsComponent, shouldFocusTabs } from './utils';
 import DashboardContainer from './DashboardContainer';
 import { useNativeFilters } from './state';
+import { getItem, LocalStorageKeys } from '../../../utils/localStorageHelpers';
 
 type DashboardBuilderProps = {};
 
@@ -295,7 +296,8 @@ const DashboardBuilder: FC<DashboardBuilderProps> = () => {
   const hideDashboardHeader =
     uiConfig.hideTitle ||
     standaloneMode === DashboardStandaloneMode.HIDE_NAV_AND_TITLE ||
-    isReport;
+    isReport ||
+    getItem(LocalStorageKeys.custom_routes, {}).home;
 
   const [barTopOffset, setBarTopOffset] = useState(0);
 

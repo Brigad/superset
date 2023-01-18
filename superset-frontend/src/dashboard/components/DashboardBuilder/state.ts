@@ -27,14 +27,16 @@ import {
   useFilters,
   useNativeFiltersDataMask,
 } from '../nativeFilters/FilterBar/state';
+import { getItem, LocalStorageKeys } from '../../../utils/localStorageHelpers';
 
 // eslint-disable-next-line import/prefer-default-export
 export const useNativeFilters = () => {
   const filterboxMigrationState = useContext(MigrationContext);
   const [isInitialized, setIsInitialized] = useState(false);
+
   const showNativeFilters = useSelector<RootState, boolean>(
     state =>
-      (getUrlParam(URL_PARAMS.showFilters) ?? true) &&
+      getUrlParam(URL_PARAMS.showFilters) ??
       state.dashboardInfo.metadata?.show_native_filters,
   );
   const canEdit = useSelector<RootState, boolean>(
@@ -43,7 +45,9 @@ export const useNativeFilters = () => {
 
   const filters = useFilters();
   const filterValues = Object.values(filters);
-  const expandFilters = getUrlParam(URL_PARAMS.expandFilters);
+  const expandFilters =
+    getUrlParam(URL_PARAMS.expandFilters) ??
+    !getItem(LocalStorageKeys.custom_routes, {}).home;
   const [dashboardFiltersOpen, setDashboardFiltersOpen] = useState(
     expandFilters ?? !!filterValues.length,
   );
