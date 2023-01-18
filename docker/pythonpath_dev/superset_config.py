@@ -137,13 +137,12 @@ EXPLORE_FORM_DATA_CACHE_CONFIG = {
 
 
 class CeleryConfig(object):
-    BROKER_URL = f"redis://{CELERY_REDIS_HOST}:{REDIS_PORT}/{CELERY_BROKER_DB}"
-    CELERY_IMPORTS = ("superset.sql_lab",)
-    CELERY_RESULT_BACKEND = f"db+postgresql://{DATABASE_USER}:{DATABASE_PASSWORD}@{DATABASE_HOST}/{CELERY_BACKEND_DB}"
-    CELERYD_LOG_LEVEL = "DEBUG"
-    CELERYD_PREFETCH_MULTIPLIER = 1
-    CELERY_ACKS_LATE = False
-    CELERYBEAT_SCHEDULE = {
+    broker_url = f"redis://{CELERY_REDIS_HOST}:{REDIS_PORT}/{CELERY_BROKER_DB}"
+    imports = ("superset.sql_lab",)
+    result_backend = f"db+postgresql://{DATABASE_USER}:{DATABASE_PASSWORD}@{DATABASE_HOST}/{CELERY_BACKEND_DB}"
+    worker_prefetch_multiplier = 1
+    task_acks_late = False
+    beat_schedule = {
         "reports.scheduler": {
             "task": "reports.scheduler",
             "schedule": crontab(minute="*", hour="*"),

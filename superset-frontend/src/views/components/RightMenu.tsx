@@ -51,7 +51,6 @@ import {
   GlobalMenuDataOptions,
   RightMenuProps,
 } from './types';
-import AddDatasetModal from '../CRUD/data/dataset/AddDatasetModal';
 
 const extensionsRegistry = getExtensionsRegistry();
 
@@ -143,7 +142,6 @@ const RightMenu = ({
     HAS_GSHEETS_INSTALLED,
   } = useSelector<any, ExtentionConfigs>(state => state.common.conf);
   const [showDatabaseModal, setShowDatabaseModal] = useState<boolean>(false);
-  const [showDatasetModal, setShowDatasetModal] = useState<boolean>(false);
   const [engine, setEngine] = useState<string>('');
   const canSql = findPermission('can_sqllab', 'Superset', roles);
   const canDashboard = findPermission('can_write', 'Dashboard', roles);
@@ -179,6 +177,7 @@ const RightMenu = ({
         {
           label: t('Create dataset'),
           name: GlobalMenuDataOptions.DATASET_CREATION,
+          url: '/dataset/add/',
           perm: canDataset && nonExamplesDBConnected,
         },
         {
@@ -286,18 +285,12 @@ const RightMenu = ({
     } else if (itemChose.key === GlobalMenuDataOptions.GOOGLE_SHEETS) {
       setShowDatabaseModal(true);
       setEngine('Google Sheets');
-    } else if (itemChose.key === GlobalMenuDataOptions.DATASET_CREATION) {
-      setShowDatasetModal(true);
     }
   };
 
   const handleOnHideModal = () => {
     setEngine('');
     setShowDatabaseModal(false);
-  };
-
-  const handleOnHideDatasetModalModal = () => {
-    setShowDatasetModal(false);
   };
 
   const isDisabled = isAdmin && !allowUploads;
@@ -344,7 +337,6 @@ const RightMenu = ({
   );
 
   const handleDatabaseAdd = () => setQuery({ databaseAdded: true });
-  const handleDatasetAdd = () => setQuery({ datasetAdded: true });
 
   const theme = useTheme();
 
@@ -356,13 +348,6 @@ const RightMenu = ({
           show={showDatabaseModal}
           dbEngine={engine}
           onDatabaseAdd={handleDatabaseAdd}
-        />
-      )}
-      {canDataset && (
-        <AddDatasetModal
-          onHide={handleOnHideDatasetModalModal}
-          show={showDatasetModal}
-          onDatasetAdd={handleDatasetAdd}
         />
       )}
       {environmentTag?.text && (
@@ -514,17 +499,17 @@ const RightMenu = ({
                 )}
                 {navbarRight.version_string && (
                   <div css={versionInfoStyles}>
-                    Version: {navbarRight.version_string}
+                    {t('Version')}: {navbarRight.version_string}
                   </div>
                 )}
                 {navbarRight.version_sha && (
                   <div css={versionInfoStyles}>
-                    SHA: {navbarRight.version_sha}
+                    {t('SHA')}: {navbarRight.version_sha}
                   </div>
                 )}
                 {navbarRight.build_number && (
                   <div css={versionInfoStyles}>
-                    Build: {navbarRight.build_number}
+                    {t('Build')}: {navbarRight.build_number}
                   </div>
                 )}
               </div>
@@ -539,25 +524,38 @@ const RightMenu = ({
         )}
       </Menu>
       {navbarRight.documentation_url && (
-        <StyledAnchor
-          href={navbarRight.documentation_url}
-          target="_blank"
-          rel="noreferrer"
-          title={t('Documentation')}
-        >
-          <i className="fa fa-question" />
-          &nbsp;
-        </StyledAnchor>
+        <>
+          <StyledAnchor
+            href={navbarRight.documentation_url}
+            target="_blank"
+            rel="noreferrer"
+            title={navbarRight.documentation_text || t('Documentation')}
+          >
+            {navbarRight.documentation_icon ? (
+              <i className={navbarRight.documentation_icon} />
+            ) : (
+              <i className="fa fa-question" />
+            )}
+          </StyledAnchor>
+          <span>&nbsp;</span>
+        </>
       )}
       {navbarRight.bug_report_url && (
-        <StyledAnchor
-          href={navbarRight.bug_report_url}
-          target="_blank"
-          rel="noreferrer"
-          title={t('Report a bug')}
-        >
-          <i className="fa fa-bug" />
-        </StyledAnchor>
+        <>
+          <StyledAnchor
+            href={navbarRight.bug_report_url}
+            target="_blank"
+            rel="noreferrer"
+            title={navbarRight.bug_report_text || t('Report a bug')}
+          >
+            {navbarRight.bug_report_icon ? (
+              <i className={navbarRight.bug_report_icon} />
+            ) : (
+              <i className="fa fa-bug" />
+            )}
+          </StyledAnchor>
+          <span>&nbsp;</span>
+        </>
       )}
       {navbarRight.user_is_anonymous && (
         <StyledAnchor href={navbarRight.user_login_url}>

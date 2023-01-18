@@ -31,6 +31,7 @@ import React, {
   useReducer,
   Reducer,
 } from 'react';
+import { useHistory } from 'react-router-dom';
 import { setItem, LocalStorageKeys } from 'src/utils/localStorageHelpers';
 import { UploadChangeParam, UploadFile } from 'antd/lib/upload/interface';
 import Tabs from 'src/components/Tabs';
@@ -88,6 +89,7 @@ import {
   StyledUploadWrapper,
 } from './styles';
 import ModalHeader, { DOCUMENTATION_LINK } from './ModalHeader';
+import SSHTunnelForm from './SSHTunnelForm';
 
 const DEFAULT_EXTRA = JSON.stringify({ allows_virtual_table_explore: true });
 
@@ -145,6 +147,14 @@ export enum ActionType {
   removeTableCatalogSheet,
   reset,
   textChange,
+  parametersSSHTunnelChange,
+  setSSHTunnelLoginMethod,
+  removeSSHTunnelConfig,
+}
+
+export enum AuthType {
+  password,
+  privateKey,
 }
 
 interface DBReducerPayloadType {
@@ -165,7 +175,8 @@ export type DBReducerActionType =
         | ActionType.queryChange
         | ActionType.inputChange
         | ActionType.editorChange
-        | ActionType.parametersChange;
+        | ActionType.parametersChange
+        | ActionType.parametersSSHTunnelChange;
       payload: DBReducerPayloadType;
     }
   | {
@@ -183,7 +194,10 @@ export type DBReducerActionType =
       };
     }
   | {
-      type: ActionType.reset | ActionType.addTableCatalogSheet;
+      type:
+        | ActionType.reset
+        | ActionType.addTableCatalogSheet
+        | ActionType.removeSSHTunnelConfig;
     }
   | {
       type: ActionType.removeTableCatalogSheet;
@@ -197,6 +211,12 @@ export type DBReducerActionType =
         database_name?: string;
         engine?: string;
         configuration_method: CONFIGURATION_METHOD;
+      };
+    }
+  | {
+      type: ActionType.setSSHTunnelLoginMethod;
+      payload: {
+        login_method: AuthType;
       };
     };
 
@@ -339,6 +359,42 @@ export function dbReducer(
         },
       };
 
+    case ActionType.parametersSSHTunnelChange:
+      return {
+        ...trimmedState,
+        ssh_tunnel: {
+          ...trimmedState.ssh_tunnel,
+          [action.payload.name]: action.payload.value,
+        },
+      };
+    case ActionType.setSSHTunnelLoginMethod:
+      if (action.payload.login_method === AuthType.privateKey) {
+        const { password, ...rest } = trimmedState?.ssh_tunnel ?? {};
+        return {
+          ...trimmedState,
+          ssh_tunnel: {
+            ...rest,
+          },
+        };
+      }
+      if (action.payload.login_method === AuthType.password) {
+        const { private_key, private_key_password, ...rest } =
+          trimmedState?.ssh_tunnel ?? {};
+        return {
+          ...trimmedState,
+          ssh_tunnel: {
+            ...rest,
+          },
+        };
+      }
+      return {
+        ...trimmedState,
+      };
+    case ActionType.removeSSHTunnelConfig:
+      return {
+        ...trimmedState,
+        ssh_tunnel: undefined,
+      };
     case ActionType.addTableCatalogSheet:
       if (trimmedState.catalog !== undefined) {
         return {
@@ -415,6 +471,7 @@ export function dbReducer(
         engine: action.payload.backend || trimmedState.engine,
         configuration_method: action.payload.configuration_method,
         parameters: action.payload.parameters || trimmedState.parameters,
+        ssh_tunnel: action.payload.ssh_tunnel || trimmedState.ssh_tunnel,
         query_input,
       };
 
@@ -462,6 +519,7 @@ const DatabaseModal: FunctionComponent<DatabaseModalProps> = ({
     t('database'),
     addDangerToast,
   );
+  const history = useHistory();
 
   const [tabKey, setTabKey] = useState<string>(DEFAULT_TAB_KEY);
   const [availableDbs, getAvailableDbs] = useAvailableDatabases();
@@ -487,6 +545,13 @@ const DatabaseModal: FunctionComponent<DatabaseModalProps> = ({
   const sslForced = isFeatureEnabled(
     FeatureFlag.FORCE_DATABASE_CONNECTIONS_SSL,
   );
+  const disableSSHTunnelingForEngine = (
+    availableDbs?.databases?.find(
+      (DB: DatabaseObject) =>
+        DB.backend === db?.engine || DB.engine === db?.engine,
+    ) as DatabaseObject
+  )?.engine_information?.disable_ssh_tunneling;
+  const sshTunneling = isFeatureEnabled(FeatureFlag.SSH_TUNNELING);
   const hasAlert =
     connectionAlert || !!(db?.engine && engineSpecificAlertMapping[db.engine]);
   const useSqlAlchemyForm =
@@ -521,6 +586,7 @@ const DatabaseModal: FunctionComponent<DatabaseModalProps> = ({
       extra: db?.extra,
       masked_encrypted_extra: db?.masked_encrypted_extra || '',
       server_cert: db?.server_cert || undefined,
+      ssh_tunnel: db?.ssh_tunnel || undefined,
     };
     setTestInProgress(true);
     testDatabaseConnection(
@@ -1231,7 +1297,7 @@ const DatabaseModal: FunctionComponent<DatabaseModalProps> = ({
         onClick={() => {
           setLoading(true);
           fetchAndSetDB();
-          window.location.href = '/tablemodelview/list#create';
+          history.push('/dataset/add/');
         }}
       >
         {t('CREATE DATASET')}
@@ -1242,7 +1308,7 @@ const DatabaseModal: FunctionComponent<DatabaseModalProps> = ({
         onClick={() => {
           setLoading(true);
           fetchAndSetDB();
-          window.location.href = `/superset/sqllab/?db=true`;
+          history.push(`/superset/sqllab/?db=true`);
         }}
       >
         {t('QUERY DATA IN SQL LAB')}
@@ -1428,7 +1494,38 @@ const DatabaseModal: FunctionComponent<DatabaseModalProps> = ({
                 conf={conf}
                 testConnection={testConnection}
                 testInProgress={testInProgress}
-              />
+              >
+                {sshTunneling && !disableSSHTunnelingForEngine && (
+                  <SSHTunnelForm
+                    isEditMode={isEditMode}
+                    sshTunneling={sshTunneling}
+                    db={db as DatabaseObject}
+                    dbFetched={dbFetched as DatabaseObject}
+                    onSSHTunnelParametersChange={({
+                      target,
+                    }: {
+                      target: HTMLInputElement | HTMLTextAreaElement;
+                    }) =>
+                      onChange(ActionType.parametersSSHTunnelChange, {
+                        type: target.type,
+                        name: target.name,
+                        value: target.value,
+                      })
+                    }
+                    setSSHTunnelLoginMethod={(method: AuthType) =>
+                      setDB({
+                        type: ActionType.setSSHTunnelLoginMethod,
+                        payload: { login_method: method },
+                      })
+                    }
+                    removeSSHTunnelConfig={() =>
+                      setDB({
+                        type: ActionType.removeSSHTunnelConfig,
+                      })
+                    }
+                  />
+                )}
+              </SqlAlchemyForm>
               {isDynamic(db?.backend || db?.engine) && !isEditMode && (
                 <div css={(theme: SupersetTheme) => infoTooltip(theme)}>
                   <Button
