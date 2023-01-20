@@ -27,7 +27,6 @@ import { getChartKey } from 'src/explore/exploreUtils';
 import { getControlsState } from 'src/explore/store';
 import { Dispatch } from 'redux';
 import {
-  ensureIsArray,
   getCategoricalSchemeRegistry,
   getSequentialSchemeRegistry,
   NO_TIME_RANGE,
@@ -118,9 +117,7 @@ export const hydrateExplore =
       // which will be manipulable by future reducers.
       can_add: findPermission('can_write', 'Chart', user?.roles),
       can_download: findPermission('can_csv', 'Superset', user?.roles),
-      can_overwrite: ensureIsArray(slice?.owners).includes(
-        user?.userId as number,
-      ),
+      can_overwrite: findPermission('can_write', 'Chart', user?.roles),
       isDatasourceMetaLoading: false,
       isStarred: false,
       triggerRender: false,
