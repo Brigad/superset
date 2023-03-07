@@ -20,7 +20,7 @@ import json
 import logging
 from collections import defaultdict
 from functools import partial
-from typing import Any, Callable, Dict, List, Set, Tuple, Type, Union
+from typing import Any, Callable, Dict, List, Optional, Set, Tuple, Type, Union
 
 import sqlalchemy as sqla
 from flask_appbuilder import Model
@@ -148,6 +148,14 @@ class Dashboard(Model, AuditMixinNullable, ImportExportMixin):
         Slice, secondary=dashboard_slices, backref="dashboards"
     )
     owners = relationship(security_manager.user_model, secondary=dashboard_user)
+    if is_feature_enabled("TAGGING_SYSTEM"):
+        tags = relationship(
+            "Tag",
+            secondary="tagged_object",
+            primaryjoin="and_(Dashboard.id == TaggedObject.object_id)",
+            secondaryjoin="and_(TaggedObject.tag_id == Tag.id, "
+            "TaggedObject.object_type == 'dashboard')",
+        )
     published = Column(Boolean, default=False)
     is_managed_externally = Column(Boolean, nullable=False, default=False)
     external_url = Column(Text, nullable=True)
@@ -176,6 +184,11 @@ class Dashboard(Model, AuditMixinNullable, ImportExportMixin):
     @property
     def url(self) -> str:
         return f"/superset/dashboard/{self.slug or self.id}/"
+
+    @staticmethod
+    def get_url(id_: int, slug: Optional[str] = None) -> str:
+        # To be able to generate URL's without instanciating a Dashboard object
+        return f"/superset/dashboard/{slug or id_}/"
 
     @property
     def datasources(self) -> Set[BaseDatasource]:
@@ -423,11 +436,6 @@ class Dashboard(Model, AuditMixinNullable, ImportExportMixin):
                 remote_id=eager_datasource.id,
                 database_name=eager_datasource.database.name,
             )
-            datasource_class = copied_datasource.__class__
-            for field_name in datasource_class.export_children:
-                field_val = getattr(eager_datasource, field_name).copy()
-                # set children without creating ORM relations
-                copied_datasource.__dict__[field_name] = field_val
             eager_datasources.append(copied_datasource)
 
         return json.dumps(

@@ -49,7 +49,8 @@ const VerticalFilterControlTitle = styled.h4`
 const HorizontalFilterControlTitle = styled(VerticalFilterControlTitle)`
   font-weight: ${({ theme }) => theme.typography.weights.normal};
   color: ${({ theme }) => theme.colors.grayscale.base};
-  ${truncationCSS}
+  max-width: ${({ theme }) => theme.gridUnit * 15}px;
+  ${truncationCSS};
 `;
 
 const HorizontalOverflowFilterControlTitle = styled(
@@ -68,7 +69,6 @@ const VerticalFilterControlTitleBox = styled.div`
 
 const HorizontalFilterControlTitleBox = styled(VerticalFilterControlTitleBox)`
   margin-bottom: unset;
-  max-width: ${({ theme }) => theme.gridUnit * 15}px;
 `;
 
 const HorizontalOverflowFilterControlTitleBox = styled(
@@ -222,7 +222,6 @@ const FilterControl = ({
   filter,
   icon,
   onFilterSelectionChange,
-  focusedFilterId,
   inView,
   showOverflow,
   parentRef,
@@ -288,7 +287,6 @@ const FilterControl = ({
           dataMaskSelected={dataMaskSelected}
           filter={filter}
           showOverflow={showOverflow}
-          focusedFilterId={focusedFilterId}
           onFilterSelectionChange={onFilterSelectionChange}
           inView={inView}
           parentRef={parentRef}

@@ -56,6 +56,7 @@ from superset.utils.core import (
     AnnotationType,
     get_example_default_schema,
     AdhocMetricExpressionType,
+    ExtraFiltersReasonType,
 )
 from superset.utils.database import get_example_database, get_main_database
 from superset.common.chart_data import ChartDataResultFormat, ChartDataResultType
@@ -71,6 +72,12 @@ ADHOC_COLUMN_FIXTURE: AdhocColumn = {
     "label": "male_or_female",
     "sqlExpression": "case when gender = 'boy' then 'male' "
     "when gender = 'girl' then 'female' else 'other' end",
+}
+
+INCOMPATIBLE_ADHOC_COLUMN_FIXTURE: AdhocColumn = {
+    "hasCustomLabel": True,
+    "label": "exciting_or_boring",
+    "sqlExpression": "case when genre = 'Action' then 'Exciting' else 'Boring' end",
 }
 
 
@@ -256,6 +263,16 @@ class TestPostChartDataApi(BaseTestChartDataApi):
         assert rv.status_code == 400
 
     @pytest.mark.usefixtures("load_birth_names_dashboard_with_slices")
+    def test_empty_request_with_excel_result_format(self):
+        """
+        Chart data API: Test empty chart data with Excel result format
+        """
+        self.query_context_payload["result_format"] = "xlsx"
+        self.query_context_payload["queries"] = []
+        rv = self.post_assert_metric(CHART_DATA_URI, self.query_context_payload, "data")
+        assert rv.status_code == 400
+
+    @pytest.mark.usefixtures("load_birth_names_dashboard_with_slices")
     def test_with_csv_result_format(self):
         """
         Chart data API: Test chart data with CSV result format
@@ -264,6 +281,17 @@ class TestPostChartDataApi(BaseTestChartDataApi):
         rv = self.post_assert_metric(CHART_DATA_URI, self.query_context_payload, "data")
         assert rv.status_code == 200
         assert rv.mimetype == "text/csv"
+
+    @pytest.mark.usefixtures("load_birth_names_dashboard_with_slices")
+    def test_with_excel_result_format(self):
+        """
+        Chart data API: Test chart data with Excel result format
+        """
+        self.query_context_payload["result_format"] = "xlsx"
+        mimetype = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+        rv = self.post_assert_metric(CHART_DATA_URI, self.query_context_payload, "data")
+        assert rv.status_code == 200
+        assert rv.mimetype == mimetype
 
     @pytest.mark.usefixtures("load_birth_names_dashboard_with_slices")
     def test_with_multi_query_csv_result_format(self):
@@ -281,6 +309,21 @@ class TestPostChartDataApi(BaseTestChartDataApi):
         assert zipfile.namelist() == ["query_1.csv", "query_2.csv"]
 
     @pytest.mark.usefixtures("load_birth_names_dashboard_with_slices")
+    def test_with_multi_query_excel_result_format(self):
+        """
+        Chart data API: Test chart data with multi-query Excel result format
+        """
+        self.query_context_payload["result_format"] = "xlsx"
+        self.query_context_payload["queries"].append(
+            self.query_context_payload["queries"][0]
+        )
+        rv = self.post_assert_metric(CHART_DATA_URI, self.query_context_payload, "data")
+        assert rv.status_code == 200
+        assert rv.mimetype == "application/zip"
+        zipfile = ZipFile(BytesIO(rv.data), "r")
+        assert zipfile.namelist() == ["query_1.xlsx", "query_2.xlsx"]
+
+    @pytest.mark.usefixtures("load_birth_names_dashboard_with_slices")
     def test_with_csv_result_format_when_actor_not_permitted_for_csv__403(self):
         """
         Chart data API: Test chart data with CSV result format
@@ -288,6 +331,18 @@ class TestPostChartDataApi(BaseTestChartDataApi):
         self.logout()
         self.login(username="gamma_no_csv")
         self.query_context_payload["result_format"] = "csv"
+
+        rv = self.post_assert_metric(CHART_DATA_URI, self.query_context_payload, "data")
+        assert rv.status_code == 403
+
+    @pytest.mark.usefixtures("load_birth_names_dashboard_with_slices")
+    def test_with_excel_result_format_when_actor_not_permitted_for_excel__403(self):
+        """
+        Chart data API: Test chart data with Excel result format
+        """
+        self.logout()
+        self.login(username="gamma_no_csv")
+        self.query_context_payload["result_format"] = "xlsx"
 
         rv = self.post_assert_metric(CHART_DATA_URI, self.query_context_payload, "data")
         assert rv.status_code == 403
@@ -451,7 +506,7 @@ class TestPostChartDataApi(BaseTestChartDataApi):
 
     def test_with_invalid_where_parameter__400(self):
         self.query_context_payload["queries"][0]["filters"] = []
-        # erroneus WHERE-clause
+        # erroneous WHERE-clause
         self.query_context_payload["queries"][0]["extras"]["where"] = "(gender abc def)"
 
         rv = self.post_assert_metric(CHART_DATA_URI, self.query_context_payload, "data")
@@ -1010,6 +1065,33 @@ class TestGetChartDataApi(BaseTestChartDataApi):
         unique_genders = {row["male_or_female"] for row in data}
         assert unique_genders == {"male", "female"}
         assert result["applied_filters"] == [{"column": "male_or_female"}]
+
+    @pytest.mark.usefixtures("load_birth_names_dashboard_with_slices")
+    def test_chart_data_with_incompatible_adhoc_column(self):
+        """
+        Chart data API: Test query with adhoc column that fails to run on this dataset
+        """
+        self.login(username="admin")
+        request_payload = get_query_context("birth_names")
+        request_payload["queries"][0]["columns"] = [ADHOC_COLUMN_FIXTURE]
+        request_payload["queries"][0]["filters"] = [
+            {"col": INCOMPATIBLE_ADHOC_COLUMN_FIXTURE, "op": "IN", "val": ["Exciting"]},
+            {"col": ADHOC_COLUMN_FIXTURE, "op": "IN", "val": ["male", "female"]},
+        ]
+        rv = self.post_assert_metric(CHART_DATA_URI, request_payload, "data")
+        response_payload = json.loads(rv.data.decode("utf-8"))
+        result = response_payload["result"][0]
+        data = result["data"]
+        assert {column for column in data[0].keys()} == {"male_or_female", "sum__num"}
+        unique_genders = {row["male_or_female"] for row in data}
+        assert unique_genders == {"male", "female"}
+        assert result["applied_filters"] == [{"column": "male_or_female"}]
+        assert result["rejected_filters"] == [
+            {
+                "column": "exciting_or_boring",
+                "reason": ExtraFiltersReasonType.COL_NOT_IN_DATASOURCE,
+            }
+        ]
 
 
 @pytest.fixture()

@@ -45,6 +45,8 @@ const StyledHeader = styled.header`
   ${({ theme }) => `
       background-color: ${theme.colors.grayscale.light5};
       margin-bottom: 2px;
+      z-index: 10;
+
       &:nth-last-of-type(2) nav {
         margin-bottom: 2px;
       }
@@ -60,7 +62,7 @@ const StyledHeader = styled.header`
         padding: ${theme.gridUnit}px ${theme.gridUnit * 2}px ${
     theme.gridUnit
   }px ${theme.gridUnit * 4}px;
-        max-width: ${theme.gridUnit * 37}px;
+        max-width: ${theme.gridUnit * theme.brandIconMaxWidth}px;
         img {
           height: 100%;
           object-fit: contain;

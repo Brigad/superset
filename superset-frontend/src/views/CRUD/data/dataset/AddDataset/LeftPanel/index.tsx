@@ -23,6 +23,7 @@ import React, {
   Dispatch,
   useCallback,
 } from 'react';
+import rison from 'rison';
 import {
   SupersetClient,
   t,
@@ -189,7 +190,7 @@ export default function LeftPanel({
     (url: string) => {
       SupersetClient.get({ url })
         .then(({ json }) => {
-          const options: TableOption[] = json.options.map((table: Table) => {
+          const options: TableOption[] = json.result.map((table: Table) => {
             const option: TableOption = {
               value: table.value,
               label: <TableOption table={table} />,
@@ -240,9 +241,12 @@ export default function LeftPanel({
 
   useEffect(() => {
     if (loadTables) {
-      const endpoint = encodeURI(
-        `/superset/tables/${dataset?.db?.id}/${encodedSchema}/${refresh}/`,
-      );
+      const params = rison.encode({
+        force: refresh,
+        schema_name: encodedSchema,
+      });
+
+      const endpoint = `/api/v1/database/${dataset?.db?.id}/tables/?q=${params}`;
       getTablesList(endpoint);
     }
   }, [loadTables, dataset?.db?.id, encodedSchema, getTablesList, refresh]);

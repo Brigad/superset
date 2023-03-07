@@ -31,6 +31,7 @@ import {
 } from 'src/featureFlags';
 import setupExtensions from 'src/setup/setupExtensions';
 import getBootstrapData from 'src/utils/getBootstrapData';
+import logger from 'src/middleware/loggerMiddleware';
 import getInitialState from './reducers/getInitialState';
 import rootReducer from './reducers/index';
 import { initEnhancer } from '../reduxUtils';
@@ -42,9 +43,9 @@ import {
 import { BYTES_PER_CHAR, KB_STORAGE } from './constants';
 import setupApp from '../setup/setupApp';
 
-import './main.less';
 import '../assets/stylesheets/reactable-pagination.less';
 import { theme } from '../preamble';
+import { SqlLabGlobalStyles } from './SqlLabGlobalStyles';
 
 setupApp();
 setupExtensions();
@@ -116,7 +117,7 @@ const store = createStore(
   rootReducer,
   initialState,
   compose(
-    applyMiddleware(thunkMiddleware),
+    applyMiddleware(thunkMiddleware, logger),
     initEnhancer(
       !isFeatureEnabled(FeatureFlag.SQLLAB_BACKEND_PERSISTENCE),
       sqlLabPersistStateConfig,
@@ -141,6 +142,7 @@ const Application = () => (
     <Provider store={store}>
       <ThemeProvider theme={theme}>
         <GlobalStyles />
+        <SqlLabGlobalStyles />
         <App />
       </ThemeProvider>
     </Provider>

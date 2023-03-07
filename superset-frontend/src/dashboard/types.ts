@@ -101,14 +101,15 @@ export type DashboardInfo = {
   json_metadata: string;
   metadata: {
     native_filter_configuration: JsonObject;
-    show_native_filters: boolean;
     chart_configuration: JsonObject;
     color_scheme: string;
     color_namespace: string;
     color_scheme_domain: string[];
     label_colors: JsonObject;
     shared_label_colors: JsonObject;
+    cross_filters_enabled: boolean;
   };
+  crossFiltersEnabled: boolean;
   filterBarOrientation: FilterBarOrientation;
 };
 

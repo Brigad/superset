@@ -72,7 +72,7 @@ class TestDashboardApi(SupersetTestCase, ApiOwnersTestCaseMixin, InsertChartMixi
         "slug": "slug1_changed",
         "position_json": '{"b": "B"}',
         "css": "css_changed",
-        "json_metadata": '{"refresh_frequency": 30, "timed_refresh_immune_slices": [], "expanded_slices": {}, "color_scheme": "", "label_colors": {}, "shared_label_colors": {}, "color_scheme_domain": []}',
+        "json_metadata": '{"refresh_frequency": 30, "timed_refresh_immune_slices": [], "expanded_slices": {}, "color_scheme": "", "label_colors": {}, "shared_label_colors": {}, "color_scheme_domain": [], "cross_filters_enabled": false}',
         "published": False,
     }
 
@@ -756,7 +756,7 @@ class TestDashboardApi(SupersetTestCase, ApiOwnersTestCaseMixin, InsertChartMixi
         rv = self.get_assert_metric(uri, "get_list")
         self.assertEqual(rv.status_code, 200)
         data = json.loads(rv.data.decode("utf-8"))
-        self.assertEqual(data["count"], 5)
+        self.assertEqual(data["count"], 0)
 
     @pytest.mark.usefixtures("create_created_by_gamma_dashboards")
     def test_get_dashboards_created_by_me(self):
@@ -1345,6 +1345,65 @@ class TestDashboardApi(SupersetTestCase, ApiOwnersTestCaseMixin, InsertChartMixi
         db.session.delete(dashboard)
         db.session.delete(user_alpha1)
         db.session.delete(user_alpha2)
+        db.session.commit()
+
+    @pytest.mark.usefixtures("load_birth_names_dashboard_with_slices")
+    def test_update_dashboard_chart_owners_propagation(self):
+        """
+        Dashboard API: Test update chart owners propagation
+        """
+        user_alpha1 = self.create_user(
+            "alpha1",
+            "password",
+            "Alpha",
+            email="alpha1@superset.org",
+            first_name="alpha1",
+        )
+        admin = self.get_user("admin")
+        slices = []
+        slices.append(db.session.query(Slice).filter_by(slice_name="Trends").one())
+        slices.append(db.session.query(Slice).filter_by(slice_name="Boys").one())
+
+        # Insert dashboard with admin as owner
+        dashboard = self.insert_dashboard(
+            "title1",
+            "slug1",
+            [admin.id],
+            slices=slices,
+        )
+
+        # Updates dashboard without Boys in json_metadata positions
+        # and user_alpha1 as owner
+        dashboard_data = {
+            "owners": [user_alpha1.id],
+            "json_metadata": json.dumps(
+                {
+                    "positions": {
+                        f"{slices[0].id}": {
+                            "type": "CHART",
+                            "meta": {"chartId": slices[0].id},
+                        },
+                    }
+                }
+            ),
+        }
+        self.login(username="admin")
+        uri = f"api/v1/dashboard/{dashboard.id}"
+        rv = self.client.put(uri, json=dashboard_data)
+        self.assertEqual(rv.status_code, 200)
+
+        # Check that chart named Boys does not contain alpha 1 in its owners
+        boys = db.session.query(Slice).filter_by(slice_name="Boys").one()
+        self.assertNotIn(user_alpha1, boys.owners)
+
+        # Revert owners on slice
+        for slice in slices:
+            slice.owners = []
+            db.session.commit()
+
+        # Rollback changes
+        db.session.delete(dashboard)
+        db.session.delete(user_alpha1)
         db.session.commit()
 
     def test_update_partial_dashboard(self):

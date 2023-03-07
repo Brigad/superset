@@ -89,10 +89,23 @@ const collapseStyles = (theme: SupersetTheme) => css`
   .ant-collapse-arrow {
     top: ${theme.gridUnit * 2}px !important;
     color: ${theme.colors.primary.dark1} !important;
-    &: hover {
+    &:hover {
       color: ${theme.colors.primary.dark2} !important;
     }
   }
+`;
+
+const LeftBarStyles = styled.div`
+  ${({ theme }) => css`
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+
+    .divider {
+      border-bottom: 1px solid ${theme.colors.grayscale.light4};
+      margin: ${theme.gridUnit * 4}px 0;
+    }
+  `}
 `;
 
 const SqlEditorLeftBar = ({
@@ -197,38 +210,53 @@ const SqlEditorLeftBar = ({
   const shouldShowReset = window.location.search === '?reset=1';
   const tableMetaDataHeight = height - 130; // 130 is the height of the selects above
 
-  const handleSchemaChange = useCallback((schema: string) => {
-    if (queryEditor) {
-      dispatch(queryEditorSetSchema(queryEditor, schema));
-    }
-  }, []);
+  const handleSchemaChange = useCallback(
+    (schema: string) => {
+      if (queryEditor) {
+        dispatch(queryEditorSetSchema(queryEditor, schema));
+      }
+    },
+    [dispatch, queryEditor],
+  );
 
-  const handleTablesLoad = useCallback((options: Array<any>) => {
-    if (queryEditor) {
-      dispatch(queryEditorSetTableOptions(queryEditor, options));
-    }
-  }, []);
+  const handleTablesLoad = useCallback(
+    (options: Array<any>) => {
+      if (queryEditor) {
+        dispatch(queryEditorSetTableOptions(queryEditor, options));
+      }
+    },
+    [dispatch, queryEditor],
+  );
 
-  const handleSchemasLoad = useCallback((options: Array<any>) => {
-    if (queryEditor) {
-      dispatch(queryEditorSetSchemaOptions(queryEditor, options));
-    }
-  }, []);
+  const handleSchemasLoad = useCallback(
+    (options: Array<any>) => {
+      if (queryEditor) {
+        dispatch(queryEditorSetSchemaOptions(queryEditor, options));
+      }
+    },
+    [dispatch, queryEditor],
+  );
 
-  const handleDbList = useCallback((result: DatabaseObject) => {
-    dispatch(setDatabases(result));
-  }, []);
+  const handleDbList = useCallback(
+    (result: DatabaseObject) => {
+      dispatch(setDatabases(result));
+    },
+    [dispatch],
+  );
 
-  const handleError = useCallback((message: string) => {
-    dispatch(addDangerToast(message));
-  }, []);
+  const handleError = useCallback(
+    (message: string) => {
+      dispatch(addDangerToast(message));
+    },
+    [dispatch],
+  );
 
   const handleResetState = useCallback(() => {
     dispatch(resetState());
-  }, []);
+  }, [dispatch]);
 
   return (
-    <div data-test="sql-editor-left-bar" className="SqlEditorLeftBar">
+    <LeftBarStyles data-test="sql-editor-left-bar">
       <TableSelectorMultiple
         onEmptyResults={onEmptyResults}
         emptyState={emptyStateComponent(emptyResultsWithSearch)}
@@ -276,7 +304,7 @@ const SqlEditorLeftBar = ({
           <i className="fa fa-bomb" /> {t('Reset state')}
         </Button>
       )}
-    </div>
+    </LeftBarStyles>
   );
 };
 
