@@ -41,6 +41,8 @@ import { Select } from 'src/components';
 import Loading from 'src/components/Loading';
 import { setSaveChartModalVisibility } from 'src/explore/actions/saveModalActions';
 import { SaveActionType } from 'src/explore/types';
+import { findPermission } from 'src/utils/findPermission';
+import { UserRoles } from 'src/types/bootstrapTypes';
 
 // Session storage key for recent dashboard
 const SK_DASHBOARD_ID = 'save_chart_recent_dashboard';
@@ -50,6 +52,7 @@ interface SaveModalProps extends RouteComponentProps {
   actions: Record<string, any>;
   form_data?: Record<string, any>;
   userId: number;
+  userRoles: UserRoles;
   dashboards: Array<any>;
   alert?: string;
   sliceName?: string;
@@ -108,7 +111,7 @@ class SaveModal extends React.Component<SaveModalProps, SaveModalState> {
 
   canOverwriteSlice(): boolean {
     return (
-      this.props.slice?.owners?.includes(this.props.userId) &&
+      findPermission('can_write', 'Chart', this.props.userRoles) &&
       !this.props.slice?.is_managed_externally
     );
   }
@@ -440,6 +443,7 @@ interface StateProps {
   datasource: any;
   slice: any;
   userId: any;
+  userRoles: any;
   dashboards: any;
   alert: any;
   isVisible: boolean;
@@ -454,6 +458,7 @@ function mapStateToProps({
     datasource: explore.datasource,
     slice: explore.slice,
     userId: user?.userId,
+    userRoles: user?.roles,
     dashboards: saveModal.dashboards,
     alert: saveModal.saveModalAlert,
     isVisible: saveModal.isVisible,
