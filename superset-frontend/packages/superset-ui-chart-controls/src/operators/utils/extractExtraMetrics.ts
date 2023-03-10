@@ -21,6 +21,7 @@ import {
   QueryFormData,
   QueryFormMetric,
 } from '@superset-ui/core';
+import { isEmpty } from 'lodash';
 
 export function extractExtraMetrics(
   formData: QueryFormData,
@@ -32,6 +33,9 @@ export function extractExtraMetrics(
     timeseries_limit_metric &&
     getMetricLabel(timeseries_limit_metric) === x_axis_sort
   ) {
+    if (isEmpty(timeseries_limit_metric)) {
+      return extra_metrics;
+    }
     extra_metrics.push(timeseries_limit_metric);
   }
   return extra_metrics;
