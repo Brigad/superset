@@ -41,13 +41,14 @@ import { isUserAdmin } from 'src/dashboard/util/permissionUtils';
 import {
   MenuObjectProps,
   UserWithPermissionsAndRoles,
+  MenuObjectChildProps,
 } from 'src/types/bootstrapTypes';
 import { RootState } from 'src/dashboard/types';
 import LanguagePicker from './LanguagePicker';
 import DatabaseModal from '../CRUD/data/database/DatabaseModal';
 import { uploadUserPerms } from '../CRUD/utils';
 import {
-  ExtentionConfigs,
+  ExtensionConfigs,
   GlobalMenuDataOptions,
   RightMenuProps,
 } from './types';
@@ -140,7 +141,7 @@ const RightMenu = ({
     EXCEL_EXTENSIONS,
     ALLOWED_EXTENSIONS,
     HAS_GSHEETS_INSTALLED,
-  } = useSelector<any, ExtentionConfigs>(state => state.common.conf);
+  } = useSelector<any, ExtensionConfigs>(state => state.common.conf);
   const [showDatabaseModal, setShowDatabaseModal] = useState<boolean>(false);
   const [engine, setEngine] = useState<string>('');
   const canSql = findPermission('can_sqllab', 'Superset', roles);
@@ -190,18 +191,21 @@ const RightMenu = ({
           name: 'Upload a CSV',
           url: '/csvtodatabaseview/form',
           perm: canUploadCSV && showUploads,
+          disable: isAdmin && !allowUploads,
         },
         {
           label: t('Upload columnar file to database'),
           name: 'Upload a Columnar file',
           url: '/columnartodatabaseview/form',
           perm: canUploadColumnar && showUploads,
+          disable: isAdmin && !allowUploads,
         },
         {
           label: t('Upload Excel file to database'),
           name: 'Upload Excel',
           url: '/exceltodatabaseview/form',
           perm: canUploadExcel && showUploads,
+          disable: isAdmin && !allowUploads,
         },
       ],
     },
@@ -293,15 +297,12 @@ const RightMenu = ({
     setShowDatabaseModal(false);
   };
 
-  const isDisabled = isAdmin && !allowUploads;
-
   const tooltipText = t(
     "Enable 'Allow file uploads to database' in any database's settings",
   );
 
-  const buildMenuItem = (item: Record<string, any>) => {
-    const disabledText = isDisabled && item.url;
-    return disabledText ? (
+  const buildMenuItem = (item: MenuObjectChildProps) =>
+    item.disable ? (
       <Menu.Item key={item.name} css={styledDisabled}>
         <Tooltip placement="top" title={tooltipText}>
           {item.label}
@@ -312,7 +313,6 @@ const RightMenu = ({
         {item.url ? <a href={item.url}> {item.label} </a> : item.label}
       </Menu.Item>
     );
-  };
 
   const onMenuOpen = (openKeys: string[]) => {
     // We should query the API only if opening Data submenus
