@@ -16,6 +16,8 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+/* eslint-disable camelcase */
+import { FeatureFlag } from '@superset-ui/core';
 import { chart } from 'src/components/Chart/chartReducer';
 import { initSliceEntities } from 'src/dashboard/reducers/sliceEntities';
 import { getInitialState as getInitialNativeFilterState } from 'src/dashboard/reducers/nativeFilters';
@@ -51,7 +53,7 @@ import { TIME_RANGE } from 'src/visualizations/FilterBox/FilterBox';
 import { URL_PARAMS } from 'src/constants';
 import { getUrlParam } from 'src/utils/urlUtils';
 import { ResourceStatus } from 'src/hooks/apiResources/apiResources';
-import { FeatureFlag, isFeatureEnabled } from '../../featureFlags';
+import { isFeatureEnabled } from '../../featureFlags';
 import extractUrlParams from '../util/extractUrlParams';
 import { updateColorSchema } from './dashboardInfo';
 import updateComponentParentsList from '../util/updateComponentParentsList';
@@ -307,11 +309,14 @@ export const hydrateDashboard =
     });
 
     if (isFeatureEnabled(FeatureFlag.DASHBOARD_CROSS_FILTERS)) {
-      metadata.chart_configuration = getCrossFiltersConfiguration(
-        dashboardLayout.present,
-        metadata.chart_configuration,
-        chartQueries,
-      );
+      const { chartConfiguration, globalChartConfiguration } =
+        getCrossFiltersConfiguration(
+          dashboardLayout.present,
+          metadata,
+          chartQueries,
+        );
+      metadata.chart_configuration = chartConfiguration;
+      metadata.global_chart_configuration = globalChartConfiguration;
     }
 
     const { roles } = user;

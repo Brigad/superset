@@ -17,6 +17,7 @@
  * under the License.
  */
 import {
+  DataMask,
   DataMaskStateWithId,
   DataMaskType,
   ensureIsArray,
@@ -31,8 +32,11 @@ import {
 } from '@superset-ui/core';
 import { TIME_FILTER_MAP } from 'src/explore/constants';
 import { getChartIdsInFilterBoxScope } from 'src/dashboard/util/activeDashboardFilters';
-import { ChartConfiguration } from 'src/dashboard/reducers/types';
-import { Layout } from 'src/dashboard/types';
+import {
+  ChartConfiguration,
+  DashboardLayout,
+  Layout,
+} from 'src/dashboard/types';
 import { areObjectsEqual } from 'src/reduxUtils';
 
 export enum IndicatorStatus {
@@ -49,6 +53,7 @@ const TIME_GRANULARITY_FIELDS = new Set(Object.values(TIME_FILTER_MAP));
 type Datasource = {
   time_grain_sqla?: [string, string][];
   granularity?: [string, string][];
+  verbose_map?: Record<string, string>;
 };
 
 type Filter = {
@@ -61,7 +66,7 @@ type Filter = {
   datasourceId: string;
 };
 
-const extractLabel = (filter?: FilterState): string | null => {
+export const extractLabel = (filter?: FilterState): string | null => {
   if (filter?.label && !filter?.label?.includes(undefined)) {
     return filter.label;
   }
@@ -162,6 +167,36 @@ export type Indicator = {
 
 export type CrossFilterIndicator = Indicator & { emitterId: number };
 
+export const getCrossFilterIndicator = (
+  chartId: number,
+  dataMask: DataMask,
+  dashboardLayout: DashboardLayout,
+) => {
+  const filterState = dataMask?.filterState;
+  const filters = dataMask?.extraFormData?.filters;
+  const label = extractLabel(filterState);
+  const filtersState = filterState?.filters;
+  const column =
+    filters?.[0]?.col || (filtersState && Object.keys(filtersState)[0]);
+
+  const dashboardLayoutItem = Object.values(dashboardLayout).find(
+    layoutItem => layoutItem?.meta?.chartId === chartId,
+  );
+  const filterObject: Indicator = {
+    column,
+    name:
+      dashboardLayoutItem?.meta?.sliceNameOverride ||
+      dashboardLayoutItem?.meta?.sliceName ||
+      '',
+    path: [
+      ...(dashboardLayoutItem?.parents ?? []),
+      dashboardLayoutItem?.id || '',
+    ],
+    value: label,
+  };
+  return filterObject;
+};
+
 const cachedIndicatorsForChart = {};
 const cachedDashboardFilterDataForChart = {};
 // inspects redux state to find what the filter indicators should be shown for a given chart
@@ -233,17 +268,18 @@ const getStatus = ({
 }): IndicatorStatus => {
   // a filter is only considered unset if it's value is null
   const hasValue = label !== null;
-  if (type === DataMaskType.CrossFilters && hasValue) {
-    return IndicatorStatus.CrossFilterApplied;
-  }
+  const APPLIED_STATUS =
+    type === DataMaskType.CrossFilters
+      ? IndicatorStatus.CrossFilterApplied
+      : IndicatorStatus.Applied;
   if (!column && hasValue) {
     // Filter without datasource
-    return IndicatorStatus.Applied;
+    return APPLIED_STATUS;
   }
   if (column && rejectedColumns?.has(column))
     return IndicatorStatus.Incompatible;
   if (column && appliedColumns?.has(column) && hasValue) {
-    return IndicatorStatus.Applied;
+    return APPLIED_STATUS;
   }
   return IndicatorStatus.Unset;
 };
@@ -254,11 +290,12 @@ export const selectChartCrossFilters = (
   chartId: number,
   dashboardLayout: Layout,
   chartConfiguration: ChartConfiguration = defaultChartConfig,
+  appliedColumns: Set<string>,
+  rejectedColumns: Set<string>,
   filterEmitter = false,
 ): Indicator[] | CrossFilterIndicator[] => {
   let crossFilterIndicators: any = [];
   if (isFeatureEnabled(FeatureFlag.DASHBOARD_CROSS_FILTERS)) {
-    const dashboardLayoutValues = Object.values(dashboardLayout);
     crossFilterIndicators = Object.values(chartConfiguration)
       .filter(chartConfig => {
         const inScope =
@@ -272,34 +309,22 @@ export const selectChartCrossFilters = (
         return false;
       })
       .map(chartConfig => {
-        const filterState = dataMask[chartConfig.id]?.filterState;
-        const extraFormData = dataMask[chartConfig.id]?.extraFormData;
-        const label = extractLabel(filterState);
-        const filtersState = filterState?.filters;
-        const column =
-          extraFormData?.filters?.[0]?.col ||
-          (filtersState && Object.keys(filtersState)[0]);
-
-        const dashboardLayoutItem = dashboardLayoutValues.find(
-          layoutItem => layoutItem?.meta?.chartId === chartConfig.id,
+        const filterIndicator = getCrossFilterIndicator(
+          Number(chartConfig.id),
+          dataMask[chartConfig.id],
+          dashboardLayout,
         );
-        const filterObject: Indicator = {
-          column,
-          name: dashboardLayoutItem?.meta?.sliceName as string,
-          path: [
-            ...(dashboardLayoutItem?.parents ?? []),
-            dashboardLayoutItem?.id || '',
-          ],
-          status: getStatus({
-            label,
-            type: DataMaskType.CrossFilters,
-          }),
-          value: label,
-        };
-        if (filterEmitter) {
-          (filterObject as CrossFilterIndicator).emitterId = chartId;
-        }
-        return filterObject;
+        const filterStatus = getStatus({
+          label: filterIndicator.value,
+          column: filterIndicator.column
+            ? getColumnLabel(filterIndicator.column)
+            : undefined,
+          type: DataMaskType.CrossFilters,
+          appliedColumns,
+          rejectedColumns,
+        });
+
+        return { ...filterIndicator, status: filterStatus };
       })
       .filter(filter => filter.status === IndicatorStatus.CrossFilterApplied);
   }
@@ -369,6 +394,8 @@ export const selectNativeIndicatorsForChart = (
       chartId,
       dashboardLayout,
       chartConfiguration,
+      appliedColumns,
+      rejectedColumns,
     );
   }
   const indicators = crossFilterIndicators.concat(nativeFilterIndicators);

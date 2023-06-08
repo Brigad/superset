@@ -25,9 +25,9 @@ import { Provider } from 'react-redux';
 import { styledMount as mount } from 'spec/helpers/theming';
 
 import DatabaseList from 'src/pages/DatabaseList';
-import DatabaseModal from 'src/views/CRUD/data/database/DatabaseModal';
+import DatabaseModal from 'src/features/databases/DatabaseModal';
 import DeleteModal from 'src/components/DeleteModal';
-import SubMenu from 'src/views/components/SubMenu';
+import SubMenu from 'src/features/home/SubMenu';
 import ListView from 'src/components/ListView';
 import Filters from 'src/components/ListView/Filters';
 import waitForComponentToPaint from 'spec/helpers/waitForComponentToPaint';
@@ -165,9 +165,14 @@ describe('Admin DatabaseList', () => {
     });
     await waitForComponentToPaint(wrapper);
 
-    expect(wrapper.find(DeleteModal).props().description).toMatchInlineSnapshot(
-      `"The database db 0 is linked to 0 charts that appear on 0 dashboards and users have 0 SQL Lab tabs using this database open. Are you sure you want to continue? Deleting the database will break those objects."`,
-    );
+    expect(wrapper.find(DeleteModal).props().description)
+      .toMatchInlineSnapshot(`
+      <React.Fragment>
+        <p>
+          The database db 0 is linked to 0 charts that appear on 0 dashboards and users have 0 SQL Lab tabs using this database open. Are you sure you want to continue? Deleting the database will break those objects.
+        </p>
+      </React.Fragment>
+    `);
 
     act(() => {
       wrapper

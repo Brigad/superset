@@ -22,7 +22,7 @@ import re
 import tempfile
 import time
 from datetime import datetime
-from typing import Any, Dict, List, Optional, Set, Tuple, TYPE_CHECKING
+from typing import Any, TYPE_CHECKING
 from urllib import parse
 
 import numpy as np
@@ -98,6 +98,8 @@ class HiveEngineSpec(PrestoEngineSpec):
     allows_alias_to_source_column = True
     allows_hidden_orderby_agg = False
 
+    supports_dynamic_schema = True
+
     # When running `SHOW FUNCTIONS`, what is the name of the column with the
     # function names?
     _show_functions_column = "tab_name"
@@ -122,7 +124,7 @@ class HiveEngineSpec(PrestoEngineSpec):
     jobs_stats_r = re.compile(r".*INFO.*Total jobs = (?P<max_jobs>[0-9]+)")
     # 17/02/07 19:37:08 INFO ql.Driver: Launching Job 2 out of 5
     launching_job_r = re.compile(
-        ".*INFO.*Launching Job (?P<job_number>[0-9]+) out of " "(?P<max_jobs>[0-9]+)"
+        ".*INFO.*Launching Job (?P<job_number>[0-9]+) out of (?P<max_jobs>[0-9]+)"
     )
     # 17/02/07 19:36:58 INFO exec.Task: 2017-02-07 19:36:58,152 Stage-18
     # map = 0%,  reduce = 0%
@@ -148,9 +150,7 @@ class HiveEngineSpec(PrestoEngineSpec):
         hive.Cursor.fetch_logs = fetch_logs
 
     @classmethod
-    def fetch_data(
-        cls, cursor: Any, limit: Optional[int] = None
-    ) -> List[Tuple[Any, ...]]:
+    def fetch_data(cls, cursor: Any, limit: int | None = None) -> list[tuple[Any, ...]]:
         # pylint: disable=import-outside-toplevel
         import pyhive
         from TCLIService import ttypes
@@ -166,10 +166,10 @@ class HiveEngineSpec(PrestoEngineSpec):
     @classmethod
     def df_to_sql(
         cls,
-        database: "Database",
+        database: Database,
         table: Table,
         df: pd.DataFrame,
-        to_sql_kwargs: Dict[str, Any],
+        to_sql_kwargs: dict[str, Any],
     ) -> None:
         """
         Upload data from a Pandas DataFrame to a database.
@@ -191,7 +191,6 @@ class HiveEngineSpec(PrestoEngineSpec):
             raise SupersetException("Append operation not currently supported")
 
         if to_sql_kwargs["if_exists"] == "fail":
-
             # Ensure table doesn't already exist.
             if table.schema:
                 table_exists = not database.get_df(
@@ -247,8 +246,8 @@ class HiveEngineSpec(PrestoEngineSpec):
 
     @classmethod
     def convert_dttm(
-        cls, target_type: str, dttm: datetime, db_extra: Optional[Dict[str, Any]] = None
-    ) -> Optional[str]:
+        cls, target_type: str, dttm: datetime, db_extra: dict[str, Any] | None = None
+    ) -> str | None:
         sqla_type = cls.get_sqla_column_type(target_type)
 
         if isinstance(sqla_type, types.Date):
@@ -259,13 +258,28 @@ class HiveEngineSpec(PrestoEngineSpec):
         return None
 
     @classmethod
-    def adjust_database_uri(
-        cls, uri: URL, selected_schema: Optional[str] = None
-    ) -> URL:
-        if selected_schema:
-            uri = uri.set(database=parse.quote(selected_schema, safe=""))
+    def adjust_engine_params(
+        cls,
+        uri: URL,
+        connect_args: dict[str, Any],
+        catalog: str | None = None,
+        schema: str | None = None,
+    ) -> tuple[URL, dict[str, Any]]:
+        if schema:
+            uri = uri.set(database=parse.quote(schema, safe=""))
 
-        return uri
+        return uri, connect_args
+
+    @classmethod
+    def get_schema_from_engine_params(
+        cls,
+        sqlalchemy_uri: URL,
+        connect_args: dict[str, Any],
+    ) -> str | None:
+        """
+        Return the configured schema.
+        """
+        return parse.unquote(sqlalchemy_uri.database)
 
     @classmethod
     def _extract_error_message(cls, ex: Exception) -> str:
@@ -276,10 +290,10 @@ class HiveEngineSpec(PrestoEngineSpec):
         return msg
 
     @classmethod
-    def progress(cls, log_lines: List[str]) -> int:
+    def progress(cls, log_lines: list[str]) -> int:
         total_jobs = 1  # assuming there's at least 1 job
         current_job = 1
-        stages: Dict[int, float] = {}
+        stages: dict[int, float] = {}
         for line in log_lines:
             match = cls.jobs_stats_r.match(line)
             if match:
@@ -307,7 +321,7 @@ class HiveEngineSpec(PrestoEngineSpec):
         return int(progress)
 
     @classmethod
-    def get_tracking_url_from_logs(cls, log_lines: List[str]) -> Optional[str]:
+    def get_tracking_url_from_logs(cls, log_lines: list[str]) -> str | None:
         lkp = "Tracking URL = "
         for line in log_lines:
             if lkp in line:
@@ -391,19 +405,19 @@ class HiveEngineSpec(PrestoEngineSpec):
 
     @classmethod
     def get_columns(
-        cls, inspector: Inspector, table_name: str, schema: Optional[str]
-    ) -> List[Dict[str, Any]]:
+        cls, inspector: Inspector, table_name: str, schema: str | None
+    ) -> list[dict[str, Any]]:
         return inspector.get_columns(table_name, schema)
 
     @classmethod
     def where_latest_partition(  # pylint: disable=too-many-arguments
         cls,
         table_name: str,
-        schema: Optional[str],
-        database: "Database",
+        schema: str | None,
+        database: Database,
         query: Select,
-        columns: Optional[List[Dict[str, str]]] = None,
-    ) -> Optional[Select]:
+        columns: list[dict[str, Any]] | None = None,
+    ) -> Select | None:
         try:
             col_names, values = cls.latest_partition(
                 table_name, schema, database, show_first=True
@@ -421,18 +435,18 @@ class HiveEngineSpec(PrestoEngineSpec):
         return None
 
     @classmethod
-    def _get_fields(cls, cols: List[Dict[str, Any]]) -> List[ColumnClause]:
+    def _get_fields(cls, cols: list[dict[str, Any]]) -> list[ColumnClause]:
         return BaseEngineSpec._get_fields(cols)  # pylint: disable=protected-access
 
     @classmethod
-    def latest_sub_partition(
-        cls, table_name: str, schema: Optional[str], database: "Database", **kwargs: Any
+    def latest_sub_partition(  # type: ignore
+        cls, table_name: str, schema: str | None, database: Database, **kwargs: Any
     ) -> str:
         # TODO(bogdan): implement`
         pass
 
     @classmethod
-    def _latest_partition_from_df(cls, df: pd.DataFrame) -> Optional[List[str]]:
+    def _latest_partition_from_df(cls, df: pd.DataFrame) -> list[str] | None:
         """Hive partitions look like ds={partition name}/ds={partition name}"""
         if not df.empty:
             return [
@@ -445,25 +459,28 @@ class HiveEngineSpec(PrestoEngineSpec):
     def _partition_query(  # pylint: disable=too-many-arguments
         cls,
         table_name: str,
-        database: "Database",
+        schema: str | None,
+        indexes: list[dict[str, Any]],
+        database: Database,
         limit: int = 0,
-        order_by: Optional[List[Tuple[str, bool]]] = None,
-        filters: Optional[Dict[Any, Any]] = None,
+        order_by: list[tuple[str, bool]] | None = None,
+        filters: dict[Any, Any] | None = None,
     ) -> str:
-        return f"SHOW PARTITIONS {table_name}"
+        full_table_name = f"{schema}.{table_name}" if schema else table_name
+        return f"SHOW PARTITIONS {full_table_name}"
 
     @classmethod
     def select_star(  # pylint: disable=too-many-arguments
         cls,
-        database: "Database",
+        database: Database,
         table_name: str,
         engine: Engine,
-        schema: Optional[str] = None,
+        schema: str | None = None,
         limit: int = 100,
         show_cols: bool = False,
         indent: bool = True,
         latest_partition: bool = True,
-        cols: Optional[List[Dict[str, Any]]] = None,
+        cols: list[dict[str, Any]] | None = None,
     ) -> str:
         return super(  # pylint: disable=bad-super-call
             PrestoEngineSpec, cls
@@ -481,7 +498,7 @@ class HiveEngineSpec(PrestoEngineSpec):
 
     @classmethod
     def get_url_for_impersonation(
-        cls, url: URL, impersonate_user: bool, username: Optional[str]
+        cls, url: URL, impersonate_user: bool, username: str | None
     ) -> URL:
         """
         Return a modified URL with the username set.
@@ -497,9 +514,9 @@ class HiveEngineSpec(PrestoEngineSpec):
     @classmethod
     def update_impersonation_config(
         cls,
-        connect_args: Dict[str, Any],
+        connect_args: dict[str, Any],
         uri: str,
-        username: Optional[str],
+        username: str | None,
     ) -> None:
         """
         Update a configuration dictionary
@@ -530,7 +547,7 @@ class HiveEngineSpec(PrestoEngineSpec):
 
     @classmethod
     @cache_manager.cache.memoize()
-    def get_function_names(cls, database: "Database") -> List[str]:
+    def get_function_names(cls, database: Database) -> list[str]:
         """
         Get a list of function names that are able to be called on the database.
         Used for SQL Lab autocomplete.
@@ -581,10 +598,10 @@ class HiveEngineSpec(PrestoEngineSpec):
     @classmethod
     def get_view_names(
         cls,
-        database: "Database",
+        database: Database,
         inspector: Inspector,
-        schema: Optional[str],
-    ) -> Set[str]:
+        schema: str | None,
+    ) -> set[str]:
         """
         Get all the view names within the specified schema.
 
@@ -616,9 +633,9 @@ class HiveEngineSpec(PrestoEngineSpec):
 
 # TODO: contribute back to pyhive.
 def fetch_logs(  # pylint: disable=protected-access
-    self: "Cursor",
+    self: Cursor,
     _max_rows: int = 1024,
-    orientation: Optional["TFetchOrientation"] = None,
+    orientation: TFetchOrientation | None = None,
 ) -> str:
     """Mocked. Retrieve the logs produced by the execution of the query.
     Can be called multiple times to fetch the logs produced after

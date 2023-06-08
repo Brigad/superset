@@ -18,7 +18,7 @@
 
 import json
 import logging
-from typing import Iterator, Tuple
+from collections.abc import Iterator
 
 import yaml
 
@@ -37,14 +37,13 @@ JSON_KEYS = {"params", "template_params", "extra"}
 
 
 class ExportDatasetsCommand(ExportModelsCommand):
-
     dao = DatasetDAO
     not_found = DatasetNotFoundError
 
     @staticmethod
     def _export(
         model: SqlaTable, export_related: bool = True
-    ) -> Iterator[Tuple[str, str]]:
+    ) -> Iterator[tuple[str, str]]:
         db_file_name = get_filename(
             model.database.database_name, model.database.id, skip_id=True
         )

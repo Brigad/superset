@@ -28,21 +28,9 @@ import logging
 import math
 import re
 from collections import defaultdict, OrderedDict
-from datetime import date, datetime, timedelta
+from datetime import datetime, timedelta
 from itertools import product
-from typing import (
-    Any,
-    Callable,
-    cast,
-    Dict,
-    List,
-    Optional,
-    Set,
-    Tuple,
-    Type,
-    TYPE_CHECKING,
-    Union,
-)
+from typing import Any, cast, Optional, TYPE_CHECKING
 
 import geohash
 import numpy as np
@@ -50,6 +38,7 @@ import pandas as pd
 import polyline
 import simplejson as json
 from dateutil import relativedelta as rdelta
+from deprecation import deprecated
 from flask import request
 from flask_babel import lazy_gettext as _
 from geopy.point import Point
@@ -87,14 +76,12 @@ from superset.utils.core import (
     get_column_names,
     get_column_names_from_columns,
     get_metric_names,
-    is_adhoc_column,
     JS_MAX_INTEGER,
     merge_extra_filters,
     QueryMode,
     simple_filter_to_adhoc,
 )
 from superset.utils.date_parser import get_since_until, parse_past_timedelta
-from superset.utils.dates import datetime_to_epoch
 from superset.utils.hashing import md5_sha_from_str
 
 if TYPE_CHECKING:
@@ -123,17 +110,18 @@ class BaseViz:  # pylint: disable=too-many-public-methods
 
     """All visualizations derive this base class"""
 
-    viz_type: Optional[str] = None
+    viz_type: str | None = None
     verbose_name = "Base Viz"
     credits = ""
     is_timeseries = False
     cache_type = "df"
     enforce_numerical_metrics = True
 
+    @deprecated(deprecated_in="3.0")
     def __init__(
         self,
-        datasource: "BaseDatasource",
-        form_data: Dict[str, Any],
+        datasource: BaseDatasource,
+        form_data: dict[str, Any],
         force: bool = False,
         force_cached: bool = False,
     ) -> None:
@@ -148,30 +136,32 @@ class BaseViz:  # pylint: disable=too-many-public-methods
         self.query = ""
         self.token = utils.get_form_data_token(form_data)
 
-        self.groupby: List[Column] = self.form_data.get("groupby") or []
+        self.groupby: list[Column] = self.form_data.get("groupby") or []
         self.time_shift = timedelta()
 
-        self.status: Optional[str] = None
+        self.status: str | None = None
         self.error_msg = ""
-        self.results: Optional[QueryResult] = None
-        self.applied_filter_columns: List[Column] = []
-        self.rejected_filter_columns: List[Column] = []
-        self.errors: List[Dict[str, Any]] = []
+        self.results: QueryResult | None = None
+        self.applied_filter_columns: list[Column] = []
+        self.rejected_filter_columns: list[Column] = []
+        self.errors: list[dict[str, Any]] = []
         self.force = force
         self._force_cached = force_cached
-        self.from_dttm: Optional[datetime] = None
-        self.to_dttm: Optional[datetime] = None
-        self._extra_chart_data: List[Tuple[str, pd.DataFrame]] = []
+        self.from_dttm: datetime | None = None
+        self.to_dttm: datetime | None = None
+        self._extra_chart_data: list[tuple[str, pd.DataFrame]] = []
 
         self.process_metrics()
 
-        self.applied_filters: List[Dict[str, str]] = []
-        self.rejected_filters: List[Dict[str, str]] = []
+        self.applied_filters: list[dict[str, str]] = []
+        self.rejected_filters: list[dict[str, str]] = []
 
     @property
+    @deprecated(deprecated_in="3.0")
     def force_cached(self) -> bool:
         return self._force_cached
 
+    @deprecated(deprecated_in="3.0")
     def process_metrics(self) -> None:
         # metrics in Viz is order sensitive, so metric_dict should be
         # OrderedDict
@@ -190,9 +180,10 @@ class BaseViz:  # pylint: disable=too-many-public-methods
         self.metric_labels = list(self.metric_dict.keys())
 
     @staticmethod
+    @deprecated(deprecated_in="3.0")
     def handle_js_int_overflow(
-        data: Dict[str, List[Dict[str, Any]]]
-    ) -> Dict[str, List[Dict[str, Any]]]:
+        data: dict[str, list[dict[str, Any]]]
+    ) -> dict[str, list[dict[str, Any]]]:
         for record in data.get("records", {}):
             for k, v in list(record.items()):
                 if isinstance(v, int):
@@ -202,6 +193,7 @@ class BaseViz:  # pylint: disable=too-many-public-methods
                         record[k] = str(v)
         return data
 
+    @deprecated(deprecated_in="3.0")
     def run_extra_queries(self) -> None:
         """Lifecycle method to use when more than one query is needed
 
@@ -224,6 +216,7 @@ class BaseViz:  # pylint: disable=too-many-public-methods
         the underlying query(ies).
         """
 
+    @deprecated(deprecated_in="3.0")
     def apply_rolling(self, df: pd.DataFrame) -> pd.DataFrame:
         rolling_type = self.form_data.get("rolling_type")
         rolling_periods = int(self.form_data.get("rolling_periods") or 0)
@@ -251,7 +244,8 @@ class BaseViz:  # pylint: disable=too-many-public-methods
             )
         return df
 
-    def get_samples(self) -> Dict[str, Any]:
+    @deprecated(deprecated_in="3.0")
+    def get_samples(self) -> dict[str, Any]:
         query_obj = self.query_obj()
         query_obj.update(
             {
@@ -272,7 +266,8 @@ class BaseViz:  # pylint: disable=too-many-public-methods
             "coltypes": payload.get("coltypes"),
         }
 
-    def get_df(self, query_obj: Optional[QueryObjectDict] = None) -> pd.DataFrame:
+    @deprecated(deprecated_in="3.0")
+    def get_df(self, query_obj: QueryObjectDict | None = None) -> pd.DataFrame:
         """Returns a pandas dataframe based on the query object"""
         if not query_obj:
             query_obj = self.query_obj()
@@ -321,6 +316,7 @@ class BaseViz:  # pylint: disable=too-many-public-methods
             df.replace([np.inf, -np.inf], np.nan, inplace=True)
         return df
 
+    @deprecated(deprecated_in="3.0")
     def df_metrics_to_num(self, df: pd.DataFrame) -> None:
         """Converting metrics to numeric when pandas.read_sql cannot"""
         metrics = self.metric_labels
@@ -328,16 +324,18 @@ class BaseViz:  # pylint: disable=too-many-public-methods
             if dtype.type == np.object_ and col in metrics:
                 df[col] = pd.to_numeric(df[col], errors="coerce")
 
+    @deprecated(deprecated_in="3.0")
     def process_query_filters(self) -> None:
         utils.convert_legacy_filters_into_adhoc(self.form_data)
         merge_extra_filters(self.form_data)
         utils.split_adhoc_filters_into_base_filters(self.form_data)
 
     @staticmethod
-    def dedup_columns(*columns_args: Optional[List[Column]]) -> List[Column]:
+    @deprecated(deprecated_in="3.0")
+    def dedup_columns(*columns_args: list[Column] | None) -> list[Column]:
         # dedup groupby and columns while preserving order
-        labels: List[str] = []
-        deduped_columns: List[Column] = []
+        labels: list[str] = []
+        deduped_columns: list[Column] = []
         for columns in columns_args:
             for column in columns or []:
                 label = get_column_name(column)
@@ -345,6 +343,7 @@ class BaseViz:  # pylint: disable=too-many-public-methods
                     deduped_columns.append(column)
         return deduped_columns
 
+    @deprecated(deprecated_in="3.0")
     def query_obj(self) -> QueryObjectDict:  # pylint: disable=too-many-locals
         """Building a query object"""
         self.process_query_filters()
@@ -352,10 +351,11 @@ class BaseViz:  # pylint: disable=too-many-public-methods
         metrics = self.all_metrics or []
 
         groupby = self.dedup_columns(self.groupby, self.form_data.get("columns"))
-        groupby_labels = get_column_names(groupby)
 
         is_timeseries = self.is_timeseries
-        if DTTM_ALIAS in groupby_labels:
+
+        # pylint: disable=superfluous-parens
+        if DTTM_ALIAS in (groupby_labels := get_column_names(groupby)):
             del groupby[groupby_labels.index(DTTM_ALIAS)]
             is_timeseries = True
 
@@ -427,6 +427,7 @@ class BaseViz:  # pylint: disable=too-many-public-methods
         }
 
     @property
+    @deprecated(deprecated_in="3.0")
     def cache_timeout(self) -> int:
         if self.form_data.get("cache_timeout") is not None:
             return int(self.form_data["cache_timeout"])
@@ -441,11 +442,13 @@ class BaseViz:  # pylint: disable=too-many-public-methods
             return config["DATA_CACHE_CONFIG"]["CACHE_DEFAULT_TIMEOUT"]
         return config["CACHE_DEFAULT_TIMEOUT"]
 
+    @deprecated(deprecated_in="3.0")
     def get_json(self) -> str:
         return json.dumps(
             self.get_payload(), default=utils.json_int_dttm_ser, ignore_nan=True
         )
 
+    @deprecated(deprecated_in="3.0")
     def cache_key(self, query_obj: QueryObjectDict, **extra: Any) -> str:
         """
         The cache key is made out of the key/values in `query_obj`, plus any
@@ -474,7 +477,8 @@ class BaseViz:  # pylint: disable=too-many-public-methods
         json_data = self.json_dumps(cache_dict, sort_keys=True)
         return md5_sha_from_str(json_data)
 
-    def get_payload(self, query_obj: Optional[QueryObjectDict] = None) -> VizPayload:
+    @deprecated(deprecated_in="3.0")
+    def get_payload(self, query_obj: QueryObjectDict | None = None) -> VizPayload:
         """Returns a payload of metadata and data"""
 
         try:
@@ -514,9 +518,10 @@ class BaseViz:  # pylint: disable=too-many-public-methods
             payload["colnames"] = list(df.columns)
         return payload
 
+    @deprecated(deprecated_in="3.0")
     def get_df_payload(  # pylint: disable=too-many-statements
-        self, query_obj: Optional[QueryObjectDict] = None, **kwargs: Any
-    ) -> Dict[str, Any]:
+        self, query_obj: QueryObjectDict | None = None, **kwargs: Any
+    ) -> dict[str, Any]:
         """Handles caching around the df payload retrieval"""
         if not query_obj:
             query_obj = self.query_obj()
@@ -526,7 +531,9 @@ class BaseViz:  # pylint: disable=too-many-public-methods
         is_loaded = False
         stacktrace = None
         df = None
-        if cache_key and cache_manager.data_cache and not self.force:
+        cache_timeout = self.cache_timeout
+        force = self.force or cache_timeout == -1
+        if cache_key and cache_manager.data_cache and not force:
             cache_value = cache_manager.data_cache.get(cache_key)
             if cache_value:
                 stats_logger.incr("loading_from_cache")
@@ -566,7 +573,7 @@ class BaseViz:  # pylint: disable=too-many-public-methods
                     )
                     + get_column_names_from_columns(query_obj.get("groupby") or [])
                     + utils.get_column_names_from_metrics(
-                        cast(List[Metric], query_obj.get("metrics") or [])
+                        cast(list[Metric], query_obj.get("metrics") or [])
                     )
                     if col not in self.datasource.column_names
                 ]
@@ -609,16 +616,16 @@ class BaseViz:  # pylint: disable=too-many-public-methods
 
             if is_loaded and cache_key and self.status != QueryStatus.FAILED:
                 set_and_log_cache(
-                    cache_manager.data_cache,
-                    cache_key,
-                    {"df": df, "query": self.query},
-                    self.cache_timeout,
-                    self.datasource.uid,
+                    cache_instance=cache_manager.data_cache,
+                    cache_key=cache_key,
+                    cache_value={"df": df, "query": self.query},
+                    cache_timeout=cache_timeout,
+                    datasource_uid=self.datasource.uid,
                 )
         return {
             "cache_key": cache_key,
             "cached_dttm": cache_value["dttm"] if cache_value is not None else None,
-            "cache_timeout": self.cache_timeout,
+            "cache_timeout": cache_timeout,
             "df": df,
             "errors": self.errors,
             "form_data": self.form_data,
@@ -636,6 +643,7 @@ class BaseViz:  # pylint: disable=too-many-public-methods
         }
 
     @staticmethod
+    @deprecated(deprecated_in="3.0")
     def json_dumps(query_obj: Any, sort_keys: bool = False) -> str:
         return json.dumps(
             query_obj,
@@ -645,6 +653,7 @@ class BaseViz:  # pylint: disable=too-many-public-methods
         )
 
     @staticmethod
+    @deprecated(deprecated_in="3.0")
     def has_error(payload: VizPayload) -> bool:
         return (
             payload.get("status") == QueryStatus.FAILED
@@ -652,11 +661,13 @@ class BaseViz:  # pylint: disable=too-many-public-methods
             or bool(payload.get("errors"))
         )
 
-    def payload_json_and_has_error(self, payload: VizPayload) -> Tuple[str, bool]:
+    @deprecated(deprecated_in="3.0")
+    def payload_json_and_has_error(self, payload: VizPayload) -> tuple[str, bool]:
         return self.json_dumps(payload), self.has_error(payload)
 
     @property
-    def data(self) -> Dict[str, Any]:
+    @deprecated(deprecated_in="3.0")
+    def data(self) -> dict[str, Any]:
         """This is the data object serialized to the js layer"""
         content = {
             "form_data": self.form_data,
@@ -666,18 +677,22 @@ class BaseViz:  # pylint: disable=too-many-public-methods
         }
         return content
 
-    def get_csv(self) -> Optional[str]:
+    @deprecated(deprecated_in="3.0")
+    def get_csv(self) -> str | None:
         df = self.get_df_payload()["df"]  # leverage caching logic
         include_index = not isinstance(df.index, pd.RangeIndex)
         return csv.df_to_escaped_csv(df, index=include_index, **config["CSV_EXPORT"])
 
+    @deprecated(deprecated_in="3.0")
     def get_data(self, df: pd.DataFrame) -> VizData:  # pylint: disable=no-self-use
         return df.to_dict(orient="records")
 
     @property
+    @deprecated(deprecated_in="3.0")
     def json_data(self) -> str:
         return json.dumps(self.data)
 
+    @deprecated(deprecated_in="3.0")
     def raise_for_access(self) -> None:
         """
         Raise an exception if the user cannot access the resource.
@@ -698,6 +713,7 @@ class TableViz(BaseViz):
     is_timeseries = False
     enforce_numerical_metrics = False
 
+    @deprecated(deprecated_in="3.0")
     def process_metrics(self) -> None:
         """Process form data and store parsed column configs.
         1. Determine query mode based on form_data params.
@@ -736,8 +752,8 @@ class TableViz(BaseViz):
             else QueryMode.AGGREGATE
         )
 
-        columns: List[str]  # output columns sans time and percent_metric column
-        percent_columns: List[str] = []  # percent columns that needs extra computation
+        columns: list[str]  # output columns sans time and percent_metric column
+        percent_columns: list[str] = []  # percent columns that needs extra computation
 
         if self.query_mode == QueryMode.RAW:
             columns = get_metric_names(self.form_data.get("all_columns"))
@@ -753,6 +769,7 @@ class TableViz(BaseViz):
         self.percent_columns = percent_columns
         self.is_timeseries = self.should_be_timeseries()
 
+    @deprecated(deprecated_in="3.0")
     def should_be_timeseries(self) -> bool:
         # TODO handle datasource-type-specific code in datasource
         conditions_met = (
@@ -768,6 +785,7 @@ class TableViz(BaseViz):
             )
         return bool(self.form_data.get("include_time"))
 
+    @deprecated(deprecated_in="3.0")
     def query_obj(self) -> QueryObjectDict:
         query_obj = super().query_obj()
         if self.query_mode == QueryMode.RAW:
@@ -798,6 +816,7 @@ class TableViz(BaseViz):
                 ]
         return query_obj
 
+    @deprecated(deprecated_in="3.0")
     def get_data(self, df: pd.DataFrame) -> VizData:
         """
         Transform the query result to the table representation.
@@ -830,6 +849,7 @@ class TableViz(BaseViz):
         )
 
     @staticmethod
+    @deprecated(deprecated_in="3.0")
     def json_dumps(query_obj: Any, sort_keys: bool = False) -> str:
         return json.dumps(
             query_obj,
@@ -848,6 +868,7 @@ class TimeTableViz(BaseViz):
     credits = 'a <a href="https://github.com/airbnb/superset">Superset</a> original'
     is_timeseries = True
 
+    @deprecated(deprecated_in="3.0")
     def query_obj(self) -> QueryObjectDict:
         query_obj = super().query_obj()
 
@@ -865,12 +886,13 @@ class TimeTableViz(BaseViz):
 
         return query_obj
 
+    @deprecated(deprecated_in="3.0")
     def get_data(self, df: pd.DataFrame) -> VizData:
         if df.empty:
             return None
 
         columns = None
-        values: Union[List[str], str] = self.metric_labels
+        values: list[str] | str = self.metric_labels
         if self.form_data.get("groupby"):
             values = self.metric_labels[0]
             columns = get_column_names(self.form_data.get("groupby"))
@@ -884,147 +906,6 @@ class TimeTableViz(BaseViz):
         )
 
 
-class PivotTableViz(BaseViz):
-
-    """A pivot table view, define your rows, columns and metrics"""
-
-    viz_type = "pivot_table"
-    verbose_name = _("Pivot Table")
-    credits = 'a <a href="https://github.com/airbnb/superset">Superset</a> original'
-    is_timeseries = False
-    enforce_numerical_metrics = False
-
-    def query_obj(self) -> QueryObjectDict:
-        query_obj = super().query_obj()
-        groupby = self.form_data.get("groupby")
-        columns = self.form_data.get("columns")
-        metrics = self.form_data.get("metrics")
-        transpose = self.form_data.get("transpose_pivot")
-        if not columns:
-            columns = []
-        if not groupby:
-            groupby = []
-        if not groupby:
-            raise QueryObjectValidationError(
-                _("Please choose at least one 'Group by' field")
-            )
-        if transpose and not columns:
-            raise QueryObjectValidationError(
-                _(
-                    (
-                        "Please choose at least one 'Columns' field when "
-                        "select 'Transpose Pivot' option"
-                    )
-                )
-            )
-        if not metrics:
-            raise QueryObjectValidationError(_("Please choose at least one metric"))
-        deduped_cols = self.dedup_columns(groupby, columns)
-
-        if len(deduped_cols) < (len(groupby) + len(columns)):
-            raise QueryObjectValidationError(_("Group By' and 'Columns' can't overlap"))
-        sort_by = self.form_data.get("timeseries_limit_metric")
-        if sort_by:
-            sort_by_label = utils.get_metric_name(sort_by)
-            if sort_by_label not in utils.get_metric_names(query_obj["metrics"]):
-                query_obj["metrics"].append(sort_by)
-            if self.form_data.get("order_desc"):
-                query_obj["orderby"] = [
-                    (sort_by, not self.form_data.get("order_desc", True))
-                ]
-        return query_obj
-
-    @staticmethod
-    def get_aggfunc(
-        metric: str, df: pd.DataFrame, form_data: Dict[str, Any]
-    ) -> Union[str, Callable[[Any], Any]]:
-        aggfunc = form_data.get("pandas_aggfunc") or "sum"
-        if pd.api.types.is_numeric_dtype(df[metric]):
-            # Ensure that Pandas's sum function mimics that of SQL.
-            if aggfunc == "sum":
-                return lambda x: x.sum(min_count=1)
-        # only min and max work properly for non-numerics
-        return aggfunc if aggfunc in ("min", "max") else "max"
-
-    @staticmethod
-    def _format_datetime(value: Union[pd.Timestamp, datetime, date, str]) -> str:
-        """
-        Format a timestamp in such a way that the viz will be able to apply
-        the correct formatting in the frontend.
-
-        :param value: the value of a temporal column
-        :return: formatted timestamp if it is a valid timestamp, otherwise
-                 the original value
-        """
-        tstamp: Optional[pd.Timestamp] = None
-        if isinstance(value, pd.Timestamp):
-            tstamp = value
-        if isinstance(value, (date, datetime)):
-            tstamp = pd.Timestamp(value)
-        if isinstance(value, str):
-            try:
-                tstamp = pd.Timestamp(value)
-            except ValueError:
-                pass
-        if tstamp:
-            return f"__timestamp:{datetime_to_epoch(tstamp)}"
-        # fallback in case something incompatible is returned
-        return cast(str, value)
-
-    def get_data(self, df: pd.DataFrame) -> VizData:
-        if df.empty:
-            return None
-
-        if self.form_data.get("granularity") == "all" and DTTM_ALIAS in df:
-            del df[DTTM_ALIAS]
-
-        metrics = [utils.get_metric_name(m) for m in self.form_data["metrics"]]
-        aggfuncs: Dict[str, Union[str, Callable[[Any], Any]]] = {}
-        for metric in metrics:
-            aggfuncs[metric] = self.get_aggfunc(metric, df, self.form_data)
-
-        groupby = self.form_data.get("groupby") or []
-        columns = self.form_data.get("columns") or []
-
-        for column in groupby + columns:
-            if is_adhoc_column(column):
-                # TODO: check data type
-                pass
-            else:
-                column_obj = self.datasource.get_column(column)
-                if column_obj and column_obj.is_temporal:
-                    ts = df[column].apply(self._format_datetime)
-                    df[column] = ts
-
-        if self.form_data.get("transpose_pivot"):
-            groupby, columns = columns, groupby
-
-        df = df.pivot_table(
-            index=get_column_names(groupby),
-            columns=get_column_names(columns),
-            values=metrics,
-            aggfunc=aggfuncs,
-            margins=self.form_data.get("pivot_margins"),
-        )
-
-        # Re-order the columns adhering to the metric ordering.
-        df = df[metrics]
-
-        # Display metrics side by side with each column
-        if self.form_data.get("combine_metric"):
-            df = df.stack(0).unstack().reindex(level=-1, columns=metrics)
-        return dict(
-            columns=list(df.columns),
-            html=df.to_html(
-                na_rep="null",
-                classes=(
-                    "dataframe table table-striped table-bordered "
-                    "table-condensed table-hover"
-                ).split(" "),
-            ),
-        )
-
-
 class TreemapViz(BaseViz):
 
     """Tree map visualisation for hierarchical data."""
@@ -1034,10 +915,10 @@ class TreemapViz(BaseViz):
     credits = '<a href="https://d3js.org">d3.js</a>'
     is_timeseries = False
 
+    @deprecated(deprecated_in="3.0")
     def query_obj(self) -> QueryObjectDict:
         query_obj = super().query_obj()
-        sort_by = self.form_data.get("timeseries_limit_metric")
-        if sort_by:
+        if sort_by := self.form_data.get("timeseries_limit_metric"):
             sort_by_label = utils.get_metric_name(sort_by)
             if sort_by_label not in utils.get_metric_names(query_obj["metrics"]):
                 query_obj["metrics"].append(sort_by)
@@ -1047,7 +928,8 @@ class TreemapViz(BaseViz):
                 ]
         return query_obj
 
-    def _nest(self, metric: str, df: pd.DataFrame) -> List[Dict[str, Any]]:
+    @deprecated(deprecated_in="3.0")
+    def _nest(self, metric: str, df: pd.DataFrame) -> list[dict[str, Any]]:
         nlevels = df.index.nlevels
         if nlevels == 1:
             result = [{"name": n, "value": v} for n, v in zip(df.index, df[metric])]
@@ -1058,6 +940,7 @@ class TreemapViz(BaseViz):
             ]
         return result
 
+    @deprecated(deprecated_in="3.0")
     def get_data(self, df: pd.DataFrame) -> VizData:
         if df.empty:
             return None
@@ -1079,6 +962,7 @@ class CalHeatmapViz(BaseViz):
     credits = "<a href=https://github.com/wa0x6e/cal-heatmap>cal-heatmap</a>"
     is_timeseries = True
 
+    @deprecated(deprecated_in="3.0")
     def get_data(self, df: pd.DataFrame) -> VizData:  # pylint: disable=too-many-locals
         if df.empty:
             return None
@@ -1132,6 +1016,7 @@ class CalHeatmapViz(BaseViz):
             "range": range_,
         }
 
+    @deprecated(deprecated_in="3.0")
     def query_obj(self) -> QueryObjectDict:
         query_obj = super().query_obj()
         query_obj["metrics"] = self.form_data.get("metrics")
@@ -1156,7 +1041,7 @@ class NVD3Viz(BaseViz):
     """Base class for all nvd3 vizs"""
 
     credits = '<a href="http://nvd3.org/">NVD3.org</a>'
-    viz_type: Optional[str] = None
+    viz_type: str | None = None
     verbose_name = "Base NVD3 Viz"
     is_timeseries = False
 
@@ -1169,6 +1054,7 @@ class BubbleViz(NVD3Viz):
     verbose_name = _("Bubble Chart")
     is_timeseries = False
 
+    @deprecated(deprecated_in="3.0")
     def query_obj(self) -> QueryObjectDict:
         query_obj = super().query_obj()
         query_obj["groupby"] = [self.form_data.get("entity")]
@@ -1193,6 +1079,7 @@ class BubbleViz(NVD3Viz):
             raise QueryObjectValidationError(_("Pick a metric for x, y and size"))
         return query_obj
 
+    @deprecated(deprecated_in="3.0")
     def get_data(self, df: pd.DataFrame) -> VizData:
         if df.empty:
             return None
@@ -1203,7 +1090,7 @@ class BubbleViz(NVD3Viz):
         df["shape"] = "circle"
         df["group"] = df[[get_column_name(self.series)]]  # type: ignore
 
-        series: Dict[Any, List[Any]] = defaultdict(list)
+        series: dict[Any, list[Any]] = defaultdict(list)
         for row in df.to_dict(orient="records"):
             series[row["group"]].append(row)
         chart_data = []
@@ -1220,6 +1107,7 @@ class BulletViz(NVD3Viz):
     verbose_name = _("Bullet Chart")
     is_timeseries = False
 
+    @deprecated(deprecated_in="3.0")
     def query_obj(self) -> QueryObjectDict:
         form_data = self.form_data
         query_obj = super().query_obj()
@@ -1232,6 +1120,7 @@ class BulletViz(NVD3Viz):
             raise QueryObjectValidationError(_("Pick a metric to display"))
         return query_obj
 
+    @deprecated(deprecated_in="3.0")
     def get_data(self, df: pd.DataFrame) -> VizData:
         if df.empty:
             return None
@@ -1251,6 +1140,7 @@ class BigNumberViz(BaseViz):
     credits = 'a <a href="https://github.com/airbnb/superset">Superset</a> original'
     is_timeseries = True
 
+    @deprecated(deprecated_in="3.0")
     def query_obj(self) -> QueryObjectDict:
         query_obj = super().query_obj()
         metric = self.form_data.get("metric")
@@ -1260,6 +1150,7 @@ class BigNumberViz(BaseViz):
         self.form_data["metric"] = metric
         return query_obj
 
+    @deprecated(deprecated_in="3.0")
     def get_data(self, df: pd.DataFrame) -> VizData:
         if df.empty:
             return None
@@ -1285,6 +1176,7 @@ class BigNumberTotalViz(BaseViz):
     credits = 'a <a href="https://github.com/airbnb/superset">Superset</a> original'
     is_timeseries = False
 
+    @deprecated(deprecated_in="3.0")
     def query_obj(self) -> QueryObjectDict:
         query_obj = super().query_obj()
         metric = self.form_data.get("metric")
@@ -1306,8 +1198,9 @@ class NVD3TimeSeriesViz(NVD3Viz):
     verbose_name = _("Time Series - Line Chart")
     sort_series = False
     is_timeseries = True
-    pivot_fill_value: Optional[int] = None
+    pivot_fill_value: int | None = None
 
+    @deprecated(deprecated_in="3.0")
     def query_obj(self) -> QueryObjectDict:
         query_obj = super().query_obj()
         sort_by = self.form_data.get(
@@ -1321,9 +1214,10 @@ class NVD3TimeSeriesViz(NVD3Viz):
             query_obj["orderby"] = [(sort_by, is_asc)]
         return query_obj
 
+    @deprecated(deprecated_in="3.0")
     def to_series(  # pylint: disable=too-many-branches
         self, df: pd.DataFrame, classed: str = "", title_suffix: str = ""
-    ) -> List[Dict[str, Any]]:
+    ) -> list[dict[str, Any]]:
         cols = []
         for col in df.columns:
             if col == "":
@@ -1340,7 +1234,7 @@ class NVD3TimeSeriesViz(NVD3Viz):
             ys = series[name]
             if df[name].dtype.kind not in "biufc":
                 continue
-            series_title: Union[List[str], str, Tuple[str, ...]]
+            series_title: list[str] | str | tuple[str, ...]
             if isinstance(name, list):
                 series_title = [str(title) for title in name]
             elif isinstance(name, tuple):
@@ -1382,6 +1276,7 @@ class NVD3TimeSeriesViz(NVD3Viz):
             chart_data.append(data)
         return chart_data
 
+    @deprecated(deprecated_in="3.0")
     def process_data(self, df: pd.DataFrame, aggregate: bool = False) -> VizData:
         if self.form_data.get("granularity") == "all":
             raise QueryObjectValidationError(
@@ -1425,6 +1320,7 @@ class NVD3TimeSeriesViz(NVD3Viz):
 
         return df
 
+    @deprecated(deprecated_in="3.0")
     def run_extra_queries(self) -> None:
         time_compare = self.form_data.get("time_compare") or []
         # backwards compatibility
@@ -1455,10 +1351,11 @@ class NVD3TimeSeriesViz(NVD3Viz):
                 dttm_series = df2[DTTM_ALIAS] + delta
                 df2 = df2.drop(DTTM_ALIAS, axis=1)
                 df2 = pd.concat([dttm_series, df2], axis=1)
-                label = "{} offset".format(option)
+                label = f"{option} offset"
                 df2 = self.process_data(df2)
                 self._extra_chart_data.append((label, df2))
 
+    @deprecated(deprecated_in="3.0")
     def get_data(self, df: pd.DataFrame) -> VizData:
         comparison_type = self.form_data.get("comparison_type") or "values"
         df = self.process_data(df)
@@ -1468,9 +1365,7 @@ class NVD3TimeSeriesViz(NVD3Viz):
 
             for i, (label, df2) in enumerate(self._extra_chart_data):
                 chart_data.extend(
-                    self.to_series(
-                        df2, classed="time-shift-{}".format(i), title_suffix=label
-                    )
+                    self.to_series(df2, classed=f"time-shift-{i}", title_suffix=label)
                 )
         else:
             chart_data = []
@@ -1491,16 +1386,14 @@ class NVD3TimeSeriesViz(NVD3Viz):
                     diff = df / df2
                 else:
                     raise QueryObjectValidationError(
-                        "Invalid `comparison_type`: {0}".format(comparison_type)
+                        f"Invalid `comparison_type`: {comparison_type}"
                     )
 
                 # remove leading/trailing NaNs from the time shift difference
                 diff = diff[diff.first_valid_index() : diff.last_valid_index()]
 
                 chart_data.extend(
-                    self.to_series(
-                        diff, classed="time-shift-{}".format(i), title_suffix=label
-                    )
+                    self.to_series(diff, classed=f"time-shift-{i}", title_suffix=label)
                 )
 
         if not self.sort_series:
@@ -1517,9 +1410,11 @@ class MultiLineViz(NVD3Viz):
 
     is_timeseries = True
 
+    @deprecated(deprecated_in="3.0")
     def query_obj(self) -> QueryObjectDict:
         return {}
 
+    @deprecated(deprecated_in="3.0")
     def get_data(self, df: pd.DataFrame) -> VizData:
         # pylint: disable=import-outside-toplevel,too-many-locals
         multiline_fd = self.form_data
@@ -1595,6 +1490,7 @@ class NVD3DualLineViz(NVD3Viz):
     sort_series = False
     is_timeseries = True
 
+    @deprecated(deprecated_in="3.0")
     def query_obj(self) -> QueryObjectDict:
         query_obj = super().query_obj()
         m1 = self.form_data.get("metric")
@@ -1610,7 +1506,8 @@ class NVD3DualLineViz(NVD3Viz):
         query_obj["metrics"] = [m1, m2]
         return query_obj
 
-    def to_series(self, df: pd.DataFrame, classed: str = "") -> List[Dict[str, Any]]:
+    @deprecated(deprecated_in="3.0")
+    def to_series(self, df: pd.DataFrame, classed: str = "") -> list[dict[str, Any]]:
         cols = []
         for col in df.columns:
             if col == "":
@@ -1642,6 +1539,7 @@ class NVD3DualLineViz(NVD3Viz):
             )
         return chart_data
 
+    @deprecated(deprecated_in="3.0")
     def get_data(self, df: pd.DataFrame) -> VizData:
         if df.empty:
             return None
@@ -1676,11 +1574,13 @@ class NVD3TimePivotViz(NVD3TimeSeriesViz):
     sort_series = True
     verbose_name = _("Time Series - Period Pivot")
 
+    @deprecated(deprecated_in="3.0")
     def query_obj(self) -> QueryObjectDict:
         query_obj = super().query_obj()
         query_obj["metrics"] = [self.form_data.get("metric")]
         return query_obj
 
+    @deprecated(deprecated_in="3.0")
     def get_data(self, df: pd.DataFrame) -> VizData:
         if df.empty:
             return None
@@ -1741,6 +1641,7 @@ class HistogramViz(BaseViz):
     verbose_name = _("Histogram")
     is_timeseries = False
 
+    @deprecated(deprecated_in="3.0")
     def query_obj(self) -> QueryObjectDict:
         """Returns the query object for this visualization"""
         query_obj = super().query_obj()
@@ -1758,7 +1659,8 @@ class HistogramViz(BaseViz):
         query_obj["metrics"] = None
         return query_obj
 
-    def labelify(self, keys: Union[List[str], str], column: str) -> str:
+    @deprecated(deprecated_in="3.0")
+    def labelify(self, keys: list[str] | str, column: str) -> str:
         if isinstance(keys, str):
             keys = [keys]
         # removing undesirable characters
@@ -1768,6 +1670,7 @@ class HistogramViz(BaseViz):
             labels = [column] + labels
         return "__".join(labels)
 
+    @deprecated(deprecated_in="3.0")
     def get_data(self, df: pd.DataFrame) -> VizData:
         """Returns the chart data"""
         if df.empty:
@@ -1799,6 +1702,7 @@ class DistributionBarViz(BaseViz):
     verbose_name = _("Distribution - Bar Chart")
     is_timeseries = False
 
+    @deprecated(deprecated_in="3.0")
     def query_obj(self) -> QueryObjectDict:
         query_obj = super().query_obj()
         if len(query_obj["groupby"]) < len(self.form_data.get("groupby") or []) + len(
@@ -1812,8 +1716,7 @@ class DistributionBarViz(BaseViz):
         if not self.form_data.get("groupby"):
             raise QueryObjectValidationError(_("Pick at least one field for [Series]"))
 
-        sort_by = self.form_data.get("timeseries_limit_metric")
-        if sort_by:
+        if sort_by := self.form_data.get("timeseries_limit_metric"):
             sort_by_label = utils.get_metric_name(sort_by)
             if sort_by_label not in utils.get_metric_names(query_obj["metrics"]):
                 query_obj["metrics"].append(sort_by)
@@ -1829,6 +1732,7 @@ class DistributionBarViz(BaseViz):
 
         return query_obj
 
+    @deprecated(deprecated_in="3.0")
     def get_data(self, df: pd.DataFrame) -> VizData:  # pylint: disable=too-many-locals
         if df.empty:
             return None
@@ -1890,6 +1794,7 @@ class SunburstViz(BaseViz):
         '@<a href="https://bl.ocks.org/kerryrodden/7090426">bl.ocks.org</a>'
     )
 
+    @deprecated(deprecated_in="3.0")
     def get_data(self, df: pd.DataFrame) -> VizData:
         if df.empty:
             return None
@@ -1914,6 +1819,7 @@ class SunburstViz(BaseViz):
         df = df[cols]
         return df.to_numpy().tolist()
 
+    @deprecated(deprecated_in="3.0")
     def query_obj(self) -> QueryObjectDict:
         query_obj = super().query_obj()
         query_obj["metrics"] = [self.form_data["metric"]]
@@ -1934,6 +1840,7 @@ class SankeyViz(BaseViz):
     is_timeseries = False
     credits = '<a href="https://www.npmjs.com/package/d3-sankey">d3-sankey on npm</a>'
 
+    @deprecated(deprecated_in="3.0")
     def query_obj(self) -> QueryObjectDict:
         query_obj = super().query_obj()
         if len(query_obj["groupby"]) != 2:
@@ -1945,6 +1852,7 @@ class SankeyViz(BaseViz):
             query_obj["orderby"] = [(query_obj["metrics"][0], False)]
         return query_obj
 
+    @deprecated(deprecated_in="3.0")
     def get_data(self, df: pd.DataFrame) -> VizData:
         if df.empty:
             return None
@@ -1962,15 +1870,17 @@ class SankeyViz(BaseViz):
         df["target"] = df["target"].astype(str)
         recs = df.to_dict(orient="records")
 
-        hierarchy: Dict[str, Set[str]] = defaultdict(set)
+        hierarchy: dict[str, set[str]] = defaultdict(set)
         for row in recs:
             hierarchy[row["source"]].add(row["target"])
 
-        def find_cycle(graph: Dict[str, Set[str]]) -> Optional[Tuple[str, str]]:
+        @deprecated(deprecated_in="3.0")
+        def find_cycle(graph: dict[str, set[str]]) -> tuple[str, str] | None:
             """Whether there's a cycle in a directed graph"""
             path = set()
 
-            def visit(vertex: str) -> Optional[Tuple[str, str]]:
+            @deprecated(deprecated_in="3.0")
+            def visit(vertex: str) -> tuple[str, str] | None:
                 path.add(vertex)
                 for neighbour in graph.get(vertex, ()):
                     if neighbour in path or visit(neighbour):
@@ -2004,6 +1914,7 @@ class ChordViz(BaseViz):
     credits = '<a href="https://github.com/d3/d3-chord">Bostock</a>'
     is_timeseries = False
 
+    @deprecated(deprecated_in="3.0")
     def query_obj(self) -> QueryObjectDict:
         query_obj = super().query_obj()
         query_obj["groupby"] = [
@@ -2015,6 +1926,7 @@ class ChordViz(BaseViz):
             query_obj["orderby"] = [(query_obj["metrics"][0], False)]
         return query_obj
 
+    @deprecated(deprecated_in="3.0")
     def get_data(self, df: pd.DataFrame) -> VizData:
         if df.empty:
             return None
@@ -2043,6 +1955,7 @@ class CountryMapViz(BaseViz):
     is_timeseries = False
     credits = "From bl.ocks.org By john-guerra"
 
+    @deprecated(deprecated_in="3.0")
     def query_obj(self) -> QueryObjectDict:
         query_obj = super().query_obj()
         metric = self.form_data.get("metric")
@@ -2057,6 +1970,7 @@ class CountryMapViz(BaseViz):
         query_obj["groupby"] = [entity]
         return query_obj
 
+    @deprecated(deprecated_in="3.0")
     def get_data(self, df: pd.DataFrame) -> VizData:
         if df.empty:
             return None
@@ -2078,6 +1992,7 @@ class WorldMapViz(BaseViz):
     is_timeseries = False
     credits = 'datamaps on <a href="https://www.npmjs.com/package/datamaps">npm</a>'
 
+    @deprecated(deprecated_in="3.0")
     def query_obj(self) -> QueryObjectDict:
         query_obj = super().query_obj()
         query_obj["groupby"] = [self.form_data["entity"]]
@@ -2085,6 +2000,7 @@ class WorldMapViz(BaseViz):
             query_obj["orderby"] = [(query_obj["metrics"][0], False)]
         return query_obj
 
+    @deprecated(deprecated_in="3.0")
     def get_data(self, df: pd.DataFrame) -> VizData:
         if df.empty:
             return None
@@ -2135,7 +2051,7 @@ class FilterBoxViz(BaseViz):
 
     """A multi filter, multi-choice filter box to make dashboards interactive"""
 
-    query_context_factory: Optional[QueryContextFactory] = None
+    query_context_factory: QueryContextFactory | None = None
     viz_type = "filter_box"
     verbose_name = _("Filters")
     is_timeseries = False
@@ -2143,9 +2059,11 @@ class FilterBoxViz(BaseViz):
     cache_type = "get_data"
     filter_row_limit = 1000
 
+    @deprecated(deprecated_in="3.0")
     def query_obj(self) -> QueryObjectDict:
         return {}
 
+    @deprecated(deprecated_in="3.0")
     def run_extra_queries(self) -> None:
         query_obj = super().query_obj()
         filters = self.form_data.get("filter_configs") or []
@@ -2170,6 +2088,7 @@ class FilterBoxViz(BaseViz):
             df = self.get_df_payload(query_obj=query_obj).get("df")
             self.dataframes[col] = df
 
+    @deprecated(deprecated_in="3.0")
     def get_data(self, df: pd.DataFrame) -> VizData:
         filters = self.form_data.get("filter_configs") or []
         data = {}
@@ -2196,6 +2115,7 @@ class FilterBoxViz(BaseViz):
                 data[col] = []
         return data
 
+    @deprecated(deprecated_in="3.0")
     def get_query_context_factory(self) -> QueryContextFactory:
         if self.query_context_factory is None:
             # pylint: disable=import-outside-toplevel
@@ -2221,11 +2141,11 @@ class ParallelCoordinatesViz(BaseViz):
     )
     is_timeseries = False
 
+    @deprecated(deprecated_in="3.0")
     def query_obj(self) -> QueryObjectDict:
         query_obj = super().query_obj()
         query_obj["groupby"] = [self.form_data.get("series")]
-        sort_by = self.form_data.get("timeseries_limit_metric")
-        if sort_by:
+        if sort_by := self.form_data.get("timeseries_limit_metric"):
             sort_by_label = utils.get_metric_name(sort_by)
             if sort_by_label not in utils.get_metric_names(query_obj["metrics"]):
                 query_obj["metrics"].append(sort_by)
@@ -2235,6 +2155,7 @@ class ParallelCoordinatesViz(BaseViz):
                 ]
         return query_obj
 
+    @deprecated(deprecated_in="3.0")
     def get_data(self, df: pd.DataFrame) -> VizData:
         return df.to_dict(orient="records")
 
@@ -2251,6 +2172,7 @@ class HeatmapViz(BaseViz):
         "bl.ocks.org</a>"
     )
 
+    @deprecated(deprecated_in="3.0")
     def query_obj(self) -> QueryObjectDict:
         query_obj = super().query_obj()
         query_obj["metrics"] = [self.form_data.get("metric")]
@@ -2264,6 +2186,7 @@ class HeatmapViz(BaseViz):
 
         return query_obj
 
+    @deprecated(deprecated_in="3.0")
     def get_data(self, df: pd.DataFrame) -> VizData:
         if df.empty:
             return None
@@ -2321,6 +2244,7 @@ class MapboxViz(BaseViz):
     is_timeseries = False
     credits = "<a href=https://www.mapbox.com/mapbox-gl-js/api/>Mapbox GL JS</a>"
 
+    @deprecated(deprecated_in="3.0")
     def query_obj(self) -> QueryObjectDict:
         query_obj = super().query_obj()
         label_col = self.form_data.get("mapbox_label")
@@ -2388,6 +2312,7 @@ class MapboxViz(BaseViz):
                 )
         return query_obj
 
+    @deprecated(deprecated_in="3.0")
     def get_data(self, df: pd.DataFrame) -> VizData:
         if df.empty:
             return None
@@ -2468,9 +2393,11 @@ class DeckGLMultiLayer(BaseViz):
     is_timeseries = False
     credits = '<a href="https://uber.github.io/deck.gl/">deck.gl</a>'
 
+    @deprecated(deprecated_in="3.0")
     def query_obj(self) -> QueryObjectDict:
         return {}
 
+    @deprecated(deprecated_in="3.0")
     def get_data(self, df: pd.DataFrame) -> VizData:
         # Late imports to avoid circular import issues
         # pylint: disable=import-outside-toplevel
@@ -2491,17 +2418,20 @@ class BaseDeckGLViz(BaseViz):
 
     is_timeseries = False
     credits = '<a href="https://uber.github.io/deck.gl/">deck.gl</a>'
-    spatial_control_keys: List[str] = []
+    spatial_control_keys: list[str] = []
 
-    def get_metrics(self) -> List[str]:
+    @deprecated(deprecated_in="3.0")
+    def get_metrics(self) -> list[str]:
         # pylint: disable=attribute-defined-outside-init
         self.metric = self.form_data.get("size")
         return [self.metric] if self.metric else []
 
-    def process_spatial_query_obj(self, key: str, group_by: List[str]) -> None:
+    @deprecated(deprecated_in="3.0")
+    def process_spatial_query_obj(self, key: str, group_by: list[str]) -> None:
         group_by.extend(self.get_spatial_columns(key))
 
-    def get_spatial_columns(self, key: str) -> List[str]:
+    @deprecated(deprecated_in="3.0")
+    def get_spatial_columns(self, key: str) -> list[str]:
         spatial = self.form_data.get(key)
         if spatial is None:
             raise ValueError(_("Bad spatial key"))
@@ -2517,7 +2447,8 @@ class BaseDeckGLViz(BaseViz):
         return []
 
     @staticmethod
-    def parse_coordinates(latlog: Any) -> Optional[Tuple[float, float]]:
+    @deprecated(deprecated_in="3.0")
+    def parse_coordinates(latlog: Any) -> tuple[float, float] | None:
         if not latlog:
             return None
         try:
@@ -2529,14 +2460,17 @@ class BaseDeckGLViz(BaseViz):
             ) from ex
 
     @staticmethod
-    def reverse_geohash_decode(geohash_code: str) -> Tuple[str, str]:
+    @deprecated(deprecated_in="3.0")
+    def reverse_geohash_decode(geohash_code: str) -> tuple[str, str]:
         lat, lng = geohash.decode(geohash_code)
         return (lng, lat)
 
     @staticmethod
+    @deprecated(deprecated_in="3.0")
     def reverse_latlong(df: pd.DataFrame, key: str) -> None:
         df[key] = [tuple(reversed(o)) for o in df[key] if isinstance(o, (list, tuple))]
 
+    @deprecated(deprecated_in="3.0")
     def process_spatial_data_obj(self, key: str, df: pd.DataFrame) -> pd.DataFrame:
         spatial = self.form_data.get(key)
         if spatial is None:
@@ -2569,6 +2503,7 @@ class BaseDeckGLViz(BaseViz):
             )
         return df
 
+    @deprecated(deprecated_in="3.0")
     def add_null_filters(self) -> None:
         spatial_columns = set()
         for key in self.spatial_control_keys:
@@ -2578,8 +2513,7 @@ class BaseDeckGLViz(BaseViz):
         if self.form_data.get("adhoc_filters") is None:
             self.form_data["adhoc_filters"] = []
 
-        line_column = self.form_data.get("line_column")
-        if line_column:
+        if line_column := self.form_data.get("line_column"):
             spatial_columns.add(line_column)
 
         for column in sorted(spatial_columns):
@@ -2588,13 +2522,14 @@ class BaseDeckGLViz(BaseViz):
             )
             self.form_data["adhoc_filters"].append(filter_)
 
+    @deprecated(deprecated_in="3.0")
     def query_obj(self) -> QueryObjectDict:
         # add NULL filters
         if self.form_data.get("filter_nulls", True):
             self.add_null_filters()
 
         query_obj = super().query_obj()
-        group_by: List[str] = []
+        group_by: list[str] = []
 
         for key in self.spatial_control_keys:
             self.process_spatial_query_obj(key, group_by)
@@ -2604,13 +2539,12 @@ class BaseDeckGLViz(BaseViz):
 
         if self.form_data.get("js_columns"):
             group_by += self.form_data.get("js_columns") or []
-        metrics = self.get_metrics()
         # Ensure this value is sorted so that it does not
         # cause the cache key generation (which hashes the
         # query object) to generate different keys for values
         # that should be considered the same.
         group_by = sorted(set(group_by))
-        if metrics:
+        if metrics := self.get_metrics():
             query_obj["groupby"] = group_by
             query_obj["metrics"] = metrics
             query_obj["columns"] = []
@@ -2622,10 +2556,12 @@ class BaseDeckGLViz(BaseViz):
             query_obj["columns"] = group_by
         return query_obj
 
-    def get_js_columns(self, data: Dict[str, Any]) -> Dict[str, Any]:
+    @deprecated(deprecated_in="3.0")
+    def get_js_columns(self, data: dict[str, Any]) -> dict[str, Any]:
         cols = self.form_data.get("js_columns") or []
         return {col: data.get(col) for col in cols}
 
+    @deprecated(deprecated_in="3.0")
     def get_data(self, df: pd.DataFrame) -> VizData:
         if df.empty:
             return None
@@ -2648,7 +2584,8 @@ class BaseDeckGLViz(BaseViz):
             "metricLabels": self.metric_labels,
         }
 
-    def get_properties(self, data: Dict[str, Any]) -> Dict[str, Any]:
+    @deprecated(deprecated_in="3.0")
+    def get_properties(self, data: dict[str, Any]) -> dict[str, Any]:
         raise NotImplementedError()
 
 
@@ -2661,6 +2598,7 @@ class DeckScatterViz(BaseDeckGLViz):
     spatial_control_keys = ["spatial"]
     is_timeseries = True
 
+    @deprecated(deprecated_in="3.0")
     def query_obj(self) -> QueryObjectDict:
         # pylint: disable=attribute-defined-outside-init
         self.is_timeseries = bool(
@@ -2672,7 +2610,8 @@ class DeckScatterViz(BaseDeckGLViz):
         }
         return super().query_obj()
 
-    def get_metrics(self) -> List[str]:
+    @deprecated(deprecated_in="3.0")
+    def get_metrics(self) -> list[str]:
         # pylint: disable=attribute-defined-outside-init
         self.metric = None
         if self.point_radius_fixed.get("type") == "metric":
@@ -2680,7 +2619,8 @@ class DeckScatterViz(BaseDeckGLViz):
             return [self.metric]
         return []
 
-    def get_properties(self, data: Dict[str, Any]) -> Dict[str, Any]:
+    @deprecated(deprecated_in="3.0")
+    def get_properties(self, data: dict[str, Any]) -> dict[str, Any]:
         return {
             "metric": data.get(self.metric_label) if self.metric_label else None,
             "radius": self.fixed_value
@@ -2693,6 +2633,7 @@ class DeckScatterViz(BaseDeckGLViz):
             DTTM_ALIAS: data.get(DTTM_ALIAS),
         }
 
+    @deprecated(deprecated_in="3.0")
     def get_data(self, df: pd.DataFrame) -> VizData:
         # pylint: disable=attribute-defined-outside-init
         self.metric_label = utils.get_metric_name(self.metric) if self.metric else None
@@ -2713,19 +2654,22 @@ class DeckScreengrid(BaseDeckGLViz):
     spatial_control_keys = ["spatial"]
     is_timeseries = True
 
+    @deprecated(deprecated_in="3.0")
     def query_obj(self) -> QueryObjectDict:
         self.is_timeseries = bool(
             self.form_data.get("time_grain_sqla") or self.form_data.get("granularity")
         )
         return super().query_obj()
 
-    def get_properties(self, data: Dict[str, Any]) -> Dict[str, Any]:
+    @deprecated(deprecated_in="3.0")
+    def get_properties(self, data: dict[str, Any]) -> dict[str, Any]:
         return {
             "position": data.get("spatial"),
             "weight": (data.get(self.metric_label) if self.metric_label else None) or 1,
             "__timestamp": data.get(DTTM_ALIAS) or data.get("__time"),
         }
 
+    @deprecated(deprecated_in="3.0")
     def get_data(self, df: pd.DataFrame) -> VizData:
         self.metric_label = (  # pylint: disable=attribute-defined-outside-init
             utils.get_metric_name(self.metric) if self.metric else None
@@ -2741,12 +2685,14 @@ class DeckGrid(BaseDeckGLViz):
     verbose_name = _("Deck.gl - 3D Grid")
     spatial_control_keys = ["spatial"]
 
-    def get_properties(self, data: Dict[str, Any]) -> Dict[str, Any]:
+    @deprecated(deprecated_in="3.0")
+    def get_properties(self, data: dict[str, Any]) -> dict[str, Any]:
         return {
             "position": data.get("spatial"),
             "weight": (data.get(self.metric_label) if self.metric_label else None) or 1,
         }
 
+    @deprecated(deprecated_in="3.0")
     def get_data(self, df: pd.DataFrame) -> VizData:
         self.metric_label = (  # pylint: disable=attribute-defined-outside-init
             utils.get_metric_name(self.metric) if self.metric else None
@@ -2754,7 +2700,8 @@ class DeckGrid(BaseDeckGLViz):
         return super().get_data(df)
 
 
-def geohash_to_json(geohash_code: str) -> List[List[float]]:
+@deprecated(deprecated_in="3.0")
+def geohash_to_json(geohash_code: str) -> list[list[float]]:
     bbox = geohash.bbox(geohash_code)
     return [
         [bbox.get("w"), bbox.get("n")],
@@ -2779,6 +2726,7 @@ class DeckPathViz(BaseDeckGLViz):
         "geohash": geohash_to_json,
     }
 
+    @deprecated(deprecated_in="3.0")
     def query_obj(self) -> QueryObjectDict:
         # pylint: disable=attribute-defined-outside-init
         self.is_timeseries = bool(
@@ -2795,7 +2743,8 @@ class DeckPathViz(BaseDeckGLViz):
             query_obj["columns"].append(line_col)
         return query_obj
 
-    def get_properties(self, data: Dict[str, Any]) -> Dict[str, Any]:
+    @deprecated(deprecated_in="3.0")
+    def get_properties(self, data: dict[str, Any]) -> dict[str, Any]:
         line_type = self.form_data["line_type"]
         deser = self.deser_map[line_type]
         line_column = self.form_data["line_column"]
@@ -2808,6 +2757,7 @@ class DeckPathViz(BaseDeckGLViz):
         data["__timestamp"] = data.get(DTTM_ALIAS) or data.get("__time")
         return data
 
+    @deprecated(deprecated_in="3.0")
     def get_data(self, df: pd.DataFrame) -> VizData:
         self.metric_label = (  # pylint: disable=attribute-defined-outside-init
             utils.get_metric_name(self.metric) if self.metric else None
@@ -2823,6 +2773,7 @@ class DeckPolygon(DeckPathViz):
     deck_viz_key = "polygon"
     verbose_name = _("Deck.gl - Polygon")
 
+    @deprecated(deprecated_in="3.0")
     def query_obj(self) -> QueryObjectDict:
         # pylint: disable=attribute-defined-outside-init
         self.elevation = self.form_data.get("point_radius_fixed") or {
@@ -2831,13 +2782,15 @@ class DeckPolygon(DeckPathViz):
         }
         return super().query_obj()
 
-    def get_metrics(self) -> List[str]:
+    @deprecated(deprecated_in="3.0")
+    def get_metrics(self) -> list[str]:
         metrics = [self.form_data.get("metric")]
         if self.elevation.get("type") == "metric":
             metrics.append(self.elevation.get("value"))
         return [metric for metric in metrics if metric]
 
-    def get_properties(self, data: Dict[str, Any]) -> Dict[str, Any]:
+    @deprecated(deprecated_in="3.0")
+    def get_properties(self, data: dict[str, Any]) -> dict[str, Any]:
         super().get_properties(data)
         elevation = self.form_data["point_radius_fixed"]["value"]
         type_ = self.form_data["point_radius_fixed"]["type"]
@@ -2857,7 +2810,30 @@ class DeckHex(BaseDeckGLViz):
     verbose_name = _("Deck.gl - 3D HEX")
     spatial_control_keys = ["spatial"]
 
-    def get_properties(self, data: Dict[str, Any]) -> Dict[str, Any]:
+    @deprecated(deprecated_in="3.0")
+    def get_properties(self, data: dict[str, Any]) -> dict[str, Any]:
+        return {
+            "position": data.get("spatial"),
+            "weight": (data.get(self.metric_label) if self.metric_label else None) or 1,
+        }
+
+    @deprecated(deprecated_in="3.0")
+    def get_data(self, df: pd.DataFrame) -> VizData:
+        self.metric_label = (  # pylint: disable=attribute-defined-outside-init
+            utils.get_metric_name(self.metric) if self.metric else None
+        )
+        return super().get_data(df)
+
+
+class DeckHeatmap(BaseDeckGLViz):
+
+    """deck.gl's HeatmapLayer"""
+
+    viz_type = "deck_heatmap"
+    verbose_name = _("Deck.gl - Heatmap")
+    spatial_control_keys = ["spatial"]
+
+    def get_properties(self, data: dict[str, Any]) -> dict[str, Any]:
         return {
             "position": data.get("spatial"),
             "weight": (data.get(self.metric_label) if self.metric_label else None) or 1,
@@ -2877,6 +2853,7 @@ class DeckGeoJson(BaseDeckGLViz):
     viz_type = "deck_geojson"
     verbose_name = _("Deck.gl - GeoJSON")
 
+    @deprecated(deprecated_in="3.0")
     def query_obj(self) -> QueryObjectDict:
         query_obj = super().query_obj()
         query_obj["columns"] += [self.form_data.get("geojson")]
@@ -2884,7 +2861,8 @@ class DeckGeoJson(BaseDeckGLViz):
         query_obj["groupby"] = []
         return query_obj
 
-    def get_properties(self, data: Dict[str, Any]) -> Dict[str, Any]:
+    @deprecated(deprecated_in="3.0")
+    def get_properties(self, data: dict[str, Any]) -> dict[str, Any]:
         geojson = data[get_column_name(self.form_data["geojson"])]
         return json.loads(geojson)
 
@@ -2898,13 +2876,15 @@ class DeckArc(BaseDeckGLViz):
     spatial_control_keys = ["start_spatial", "end_spatial"]
     is_timeseries = True
 
+    @deprecated(deprecated_in="3.0")
     def query_obj(self) -> QueryObjectDict:
         self.is_timeseries = bool(
             self.form_data.get("time_grain_sqla") or self.form_data.get("granularity")
         )
         return super().query_obj()
 
-    def get_properties(self, data: Dict[str, Any]) -> Dict[str, Any]:
+    @deprecated(deprecated_in="3.0")
+    def get_properties(self, data: dict[str, Any]) -> dict[str, Any]:
         dim = self.form_data.get("dimension")
         return {
             "sourcePosition": data.get("start_spatial"),
@@ -2913,12 +2893,13 @@ class DeckArc(BaseDeckGLViz):
             DTTM_ALIAS: data.get(DTTM_ALIAS),
         }
 
+    @deprecated(deprecated_in="3.0")
     def get_data(self, df: pd.DataFrame) -> VizData:
         if df.empty:
             return None
 
         return {
-            "features": super().get_data(df)["features"],  # type: ignore
+            "features": super().get_data(df)["features"],
             "mapboxApiKey": config["MAPBOX_API_KEY"],
         }
 
@@ -2932,6 +2913,7 @@ class EventFlowViz(BaseViz):
     credits = 'from <a href="https://github.com/williaster/data-ui">@data-ui</a>'
     is_timeseries = True
 
+    @deprecated(deprecated_in="3.0")
     def query_obj(self) -> QueryObjectDict:
         query = super().query_obj()
         form_data = self.form_data
@@ -2951,6 +2933,7 @@ class EventFlowViz(BaseViz):
 
         return query
 
+    @deprecated(deprecated_in="3.0")
     def get_data(self, df: pd.DataFrame) -> VizData:
         return df.to_dict(orient="records")
 
@@ -2964,10 +2947,10 @@ class PairedTTestViz(BaseViz):
     sort_series = False
     is_timeseries = True
 
+    @deprecated(deprecated_in="3.0")
     def query_obj(self) -> QueryObjectDict:
         query_obj = super().query_obj()
-        sort_by = self.form_data.get("timeseries_limit_metric")
-        if sort_by:
+        if sort_by := self.form_data.get("timeseries_limit_metric"):
             sort_by_label = utils.get_metric_name(sort_by)
             if sort_by_label not in utils.get_metric_names(query_obj["metrics"]):
                 query_obj["metrics"].append(sort_by)
@@ -2977,6 +2960,7 @@ class PairedTTestViz(BaseViz):
                 ]
         return query_obj
 
+    @deprecated(deprecated_in="3.0")
     def get_data(self, df: pd.DataFrame) -> VizData:
         """
         Transform received data frame into an object of the form:
@@ -3006,7 +2990,7 @@ class PairedTTestViz(BaseViz):
             else:
                 cols.append(col)
         df.columns = cols
-        data: Dict[str, List[Dict[str, Any]]] = {}
+        data: dict[str, list[dict[str, Any]]] = {}
         series = df.to_dict("series")
         for name_set in df.columns:
             # If no groups are defined, nameSet will be the metric name
@@ -3030,19 +3014,19 @@ class PairedTTestViz(BaseViz):
 
 
 class RoseViz(NVD3TimeSeriesViz):
-
     viz_type = "rose"
     verbose_name = _("Time Series - Nightingale Rose Chart")
     sort_series = False
     is_timeseries = True
 
+    @deprecated(deprecated_in="3.0")
     def get_data(self, df: pd.DataFrame) -> VizData:
         if df.empty:
             return None
 
         data = super().get_data(df)
-        result: Dict[str, List[Dict[str, str]]] = {}
-        for datum in data:  # type: ignore
+        result: dict[str, list[dict[str, str]]] = {}
+        for datum in data:
             key = datum["key"]
             for val in datum["values"]:
                 timestamp = val["x"].value
@@ -3069,6 +3053,7 @@ class PartitionViz(NVD3TimeSeriesViz):
     viz_type = "partition"
     verbose_name = _("Partition Diagram")
 
+    @deprecated(deprecated_in="3.0")
     def query_obj(self) -> QueryObjectDict:
         query_obj = super().query_obj()
         time_op = self.form_data.get("time_series_option", "not_time")
@@ -3077,9 +3062,10 @@ class PartitionViz(NVD3TimeSeriesViz):
         return query_obj
 
     @staticmethod
+    @deprecated(deprecated_in="3.0")
     def levels_for(
-        time_op: str, groups: List[str], df: pd.DataFrame
-    ) -> Dict[int, pd.Series]:
+        time_op: str, groups: list[str], df: pd.DataFrame
+    ) -> dict[int, pd.Series]:
         """
         Compute the partition at each `level` from the dataframe.
         """
@@ -3094,9 +3080,10 @@ class PartitionViz(NVD3TimeSeriesViz):
         return levels
 
     @staticmethod
+    @deprecated(deprecated_in="3.0")
     def levels_for_diff(
-        time_op: str, groups: List[str], df: pd.DataFrame
-    ) -> Dict[int, pd.DataFrame]:
+        time_op: str, groups: list[str], df: pd.DataFrame
+    ) -> dict[int, pd.DataFrame]:
         # Obtain a unique list of the time grains
         times = list(set(df[DTTM_ALIAS]))
         times.sort()
@@ -3130,9 +3117,10 @@ class PartitionViz(NVD3TimeSeriesViz):
             )
         return levels
 
+    @deprecated(deprecated_in="3.0")
     def levels_for_time(
-        self, groups: List[str], df: pd.DataFrame
-    ) -> Dict[int, VizData]:
+        self, groups: list[str], df: pd.DataFrame
+    ) -> dict[int, VizData]:
         procs = {}
         for i in range(0, len(groups) + 1):
             self.form_data["groupby"] = groups[:i]
@@ -3141,13 +3129,14 @@ class PartitionViz(NVD3TimeSeriesViz):
         self.form_data["groupby"] = groups
         return procs
 
+    @deprecated(deprecated_in="3.0")
     def nest_values(
         self,
-        levels: Dict[int, pd.DataFrame],
+        levels: dict[int, pd.DataFrame],
         level: int = 0,
-        metric: Optional[str] = None,
-        dims: Optional[List[str]] = None,
-    ) -> List[Dict[str, Any]]:
+        metric: str | None = None,
+        dims: list[str] | None = None,
+    ) -> list[dict[str, Any]]:
         """
         Nest values at each level on the back-end with
         access and setting, instead of summing from the bottom.
@@ -3185,13 +3174,14 @@ class PartitionViz(NVD3TimeSeriesViz):
             for i in dim_level.index
         ]
 
+    @deprecated(deprecated_in="3.0")
     def nest_procs(
         self,
-        procs: Dict[int, pd.DataFrame],
+        procs: dict[int, pd.DataFrame],
         level: int = -1,
-        dims: Optional[Tuple[str, ...]] = None,
+        dims: tuple[str, ...] | None = None,
         time: Any = None,
-    ) -> List[Dict[str, Any]]:
+    ) -> list[dict[str, Any]]:
         if dims is None:
             dims = ()
         if level == -1:
@@ -3219,6 +3209,7 @@ class PartitionViz(NVD3TimeSeriesViz):
             for i in procs[level][dims].columns
         ]
 
+    @deprecated(deprecated_in="3.0")
     def get_data(self, df: pd.DataFrame) -> VizData:
         if df.empty:
             return None
@@ -3240,7 +3231,8 @@ class PartitionViz(NVD3TimeSeriesViz):
         return self.nest_values(levels)
 
 
-def get_subclasses(cls: Type[BaseViz]) -> Set[Type[BaseViz]]:
+@deprecated(deprecated_in="3.0")
+def get_subclasses(cls: type[BaseViz]) -> set[type[BaseViz]]:
     return set(cls.__subclasses__()).union(
         [sc for c in cls.__subclasses__() for sc in get_subclasses(c)]
     )

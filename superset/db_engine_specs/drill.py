@@ -15,7 +15,7 @@
 # specific language governing permissions and limitations
 # under the License.
 from datetime import datetime
-from typing import Any, Dict, Optional
+from typing import Any, Optional
 from urllib import parse
 
 from sqlalchemy import types
@@ -31,6 +31,8 @@ class DrillEngineSpec(BaseEngineSpec):
     engine = "drill"
     engine_name = "Apache Drill"
     default_driver = "sadrill"
+
+    supports_dynamic_schema = True
 
     _time_grain_expressions = {
         None: "{col}",
@@ -57,7 +59,7 @@ class DrillEngineSpec(BaseEngineSpec):
 
     @classmethod
     def convert_dttm(
-        cls, target_type: str, dttm: datetime, db_extra: Optional[Dict[str, Any]] = None
+        cls, target_type: str, dttm: datetime, db_extra: Optional[dict[str, Any]] = None
     ) -> Optional[str]:
         sqla_type = cls.get_sqla_column_type(target_type)
 
@@ -69,11 +71,28 @@ class DrillEngineSpec(BaseEngineSpec):
         return None
 
     @classmethod
-    def adjust_database_uri(cls, uri: URL, selected_schema: Optional[str]) -> URL:
-        if selected_schema:
-            uri = uri.set(database=parse.quote(selected_schema, safe=""))
+    def adjust_engine_params(
+        cls,
+        uri: URL,
+        connect_args: dict[str, Any],
+        catalog: Optional[str] = None,
+        schema: Optional[str] = None,
+    ) -> tuple[URL, dict[str, Any]]:
+        if schema:
+            uri = uri.set(database=parse.quote(schema.replace(".", "/"), safe=""))
 
-        return uri
+        return uri, connect_args
+
+    @classmethod
+    def get_schema_from_engine_params(
+        cls,
+        sqlalchemy_uri: URL,
+        connect_args: dict[str, Any],
+    ) -> Optional[str]:
+        """
+        Return the configured schema.
+        """
+        return parse.unquote(sqlalchemy_uri.database).replace("/", ".")
 
     @classmethod
     def get_url_for_impersonation(

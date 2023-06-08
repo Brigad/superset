@@ -40,8 +40,7 @@ class MigrateAreaChart(MigrateViz):
         if self.data.get("contribution"):
             self.data["contributionMode"] = "row"
 
-        stacked = self.data.get("stacked_style")
-        if stacked:
+        if stacked := self.data.get("stacked_style"):
             stacked_map = {
                 "expand": "Expand",
                 "stack": "Stack",
@@ -49,7 +48,39 @@ class MigrateAreaChart(MigrateViz):
             self.data["show_extra_controls"] = True
             self.data["stack"] = stacked_map.get(stacked)
 
-        x_axis_label = self.data.get("x_axis_label")
-        if x_axis_label:
+        if x_axis_label := self.data.get("x_axis_label"):
             self.data["x_axis_title"] = x_axis_label
             self.data["x_axis_title_margin"] = 30
+
+
+class MigratePivotTable(MigrateViz):
+    source_viz_type = "pivot_table"
+    target_viz_type = "pivot_table_v2"
+    remove_keys = {"pivot_margins"}
+    rename_keys = {
+        "columns": "groupbyColumns",
+        "combine_metric": "combineMetric",
+        "groupby": "groupbyRows",
+        "number_format": "valueFormat",
+        "pandas_aggfunc": "aggregateFunction",
+        "row_limit": "series_limit",
+        "timeseries_limit_metric": "series_limit_metric",
+        "transpose_pivot": "transposePivot",
+    }
+    aggregation_mapping = {
+        "sum": "Sum",
+        "mean": "Average",
+        "median": "Median",
+        "min": "Minimum",
+        "max": "Maximum",
+        "std": "Sample Standard Deviation",
+        "var": "Sample Variance",
+    }
+
+    def _pre_action(self) -> None:
+        if pivot_margins := self.data.get("pivot_margins"):
+            self.data["colTotals"] = pivot_margins
+            self.data["rowTotals"] = pivot_margins
+
+        if pandas_aggfunc := self.data.get("pandas_aggfunc"):
+            self.data["pandas_aggfunc"] = self.aggregation_mapping[pandas_aggfunc]

@@ -22,15 +22,16 @@ import {
   DataMaskStateWithId,
   FeatureFlag,
   isFeatureEnabled,
+  JsonObject,
   styled,
   t,
 } from '@superset-ui/core';
 import Icons from 'src/components/Icons';
 import Loading from 'src/components/Loading';
-import { DashboardInfo, DashboardLayout, RootState } from 'src/dashboard/types';
+import { DashboardLayout, RootState } from 'src/dashboard/types';
 import { useSelector } from 'react-redux';
 import FilterControls from './FilterControls/FilterControls';
-import { getFilterBarTestId } from './utils';
+import { useChartsVerboseMaps, getFilterBarTestId } from './utils';
 import { HorizontalBarProps } from './types';
 import FilterBarSettings from './FilterBarSettings';
 import FilterConfigurationLink from './FilterConfigurationLink';
@@ -107,8 +108,8 @@ const HorizontalFilterBar: React.FC<HorizontalBarProps> = ({
   const dataMask = useSelector<RootState, DataMaskStateWithId>(
     state => state.dataMask,
   );
-  const dashboardInfo = useSelector<RootState, DashboardInfo>(
-    state => state.dashboardInfo,
+  const chartConfiguration = useSelector<RootState, JsonObject>(
+    state => state.dashboardInfo.metadata?.chart_configuration,
   );
   const dashboardLayout = useSelector<RootState, DashboardLayout>(
     state => state.dashboardLayout.present,
@@ -116,11 +117,14 @@ const HorizontalFilterBar: React.FC<HorizontalBarProps> = ({
   const isCrossFiltersEnabled = isFeatureEnabled(
     FeatureFlag.DASHBOARD_CROSS_FILTERS,
   );
+  const verboseMaps = useChartsVerboseMaps();
+
   const selectedCrossFilters = isCrossFiltersEnabled
     ? crossFiltersSelector({
         dataMask,
-        dashboardInfo,
+        chartConfiguration,
         dashboardLayout,
+        verboseMaps,
       })
     : [];
   const hasFilters = filterValues.length > 0 || selectedCrossFilters.length > 0;

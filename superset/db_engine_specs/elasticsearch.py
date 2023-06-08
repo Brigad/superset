@@ -16,9 +16,9 @@
 # under the License.
 import logging
 from datetime import datetime
-from distutils.version import StrictVersion
-from typing import Any, Dict, Optional, Type
+from typing import Any, Optional
 
+from packaging.version import Version
 from sqlalchemy import types
 
 from superset.db_engine_specs.base import BaseEngineSpec
@@ -50,10 +50,10 @@ class ElasticSearchEngineSpec(BaseEngineSpec):  # pylint: disable=abstract-metho
         "P1Y": "HISTOGRAM({col}, INTERVAL 1 YEAR)",
     }
 
-    type_code_map: Dict[int, str] = {}  # loaded from get_datatype only if needed
+    type_code_map: dict[int, str] = {}  # loaded from get_datatype only if needed
 
     @classmethod
-    def get_dbapi_exception_mapping(cls) -> Dict[Type[Exception], Type[Exception]]:
+    def get_dbapi_exception_mapping(cls) -> dict[type[Exception], type[Exception]]:
         # pylint: disable=import-error,import-outside-toplevel
         import es.exceptions as es_exceptions
 
@@ -65,9 +65,8 @@ class ElasticSearchEngineSpec(BaseEngineSpec):  # pylint: disable=abstract-metho
 
     @classmethod
     def convert_dttm(
-        cls, target_type: str, dttm: datetime, db_extra: Optional[Dict[str, Any]] = None
+        cls, target_type: str, dttm: datetime, db_extra: Optional[dict[str, Any]] = None
     ) -> Optional[str]:
-
         db_extra = db_extra or {}
 
         sqla_type = cls.get_sqla_column_type(target_type)
@@ -80,9 +79,7 @@ class ElasticSearchEngineSpec(BaseEngineSpec):  # pylint: disable=abstract-metho
             supports_dttm_parse = False
             try:
                 if es_version:
-                    supports_dttm_parse = StrictVersion(es_version) >= StrictVersion(
-                        "7.8"
-                    )
+                    supports_dttm_parse = Version(es_version) >= Version("7.8")
             except Exception as ex:  # pylint: disable=broad-except
                 logger.error("Unexpected error while convert es_version", exc_info=True)
                 logger.exception(ex)
@@ -99,7 +96,6 @@ class ElasticSearchEngineSpec(BaseEngineSpec):  # pylint: disable=abstract-metho
 
 
 class OpenDistroEngineSpec(BaseEngineSpec):  # pylint: disable=abstract-method
-
     time_groupby_inline = True
     time_secondary_columns = True
     allows_joins = False
@@ -121,7 +117,7 @@ class OpenDistroEngineSpec(BaseEngineSpec):  # pylint: disable=abstract-method
 
     @classmethod
     def convert_dttm(
-        cls, target_type: str, dttm: datetime, db_extra: Optional[Dict[str, Any]] = None
+        cls, target_type: str, dttm: datetime, db_extra: Optional[dict[str, Any]] = None
     ) -> Optional[str]:
         sqla_type = cls.get_sqla_column_type(target_type)
 

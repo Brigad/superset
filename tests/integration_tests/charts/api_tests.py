@@ -17,7 +17,6 @@
 # isort:skip_file
 """Unit tests for Superset"""
 import json
-import logging
 from io import BytesIO
 from zipfile import is_zipfile, ZipFile
 
@@ -28,7 +27,7 @@ from sqlalchemy import and_
 from sqlalchemy.sql import func
 
 from superset.connectors.sqla.models import SqlaTable
-from superset.extensions import cache_manager, db
+from superset.extensions import cache_manager, db, security_manager
 from superset.models.core import Database, FavStar, FavStarClassName
 from superset.models.dashboard import Dashboard
 from superset.reports.models import ReportSchedule, ReportScheduleType
@@ -605,6 +604,114 @@ class TestChartApi(SupersetTestCase, ApiOwnersTestCaseMixin, InsertChartMixin):
         db.session.delete(model)
         db.session.commit()
 
+    @pytest.mark.usefixtures("load_birth_names_dashboard_with_slices")
+    def test_chart_activity_access_disabled(self):
+        """
+        Chart API: Test ENABLE_BROAD_ACTIVITY_ACCESS = False
+        """
+        access_flag = app.config["ENABLE_BROAD_ACTIVITY_ACCESS"]
+        app.config["ENABLE_BROAD_ACTIVITY_ACCESS"] = False
+        admin = self.get_user("admin")
+        birth_names_table_id = SupersetTestCase.get_table(name="birth_names").id
+        chart_id = self.insert_chart("title", [admin.id], birth_names_table_id).id
+        chart_data = {
+            "slice_name": (new_name := "title1_changed"),
+        }
+        self.login(username="admin")
+        uri = f"api/v1/chart/{chart_id}"
+        rv = self.put_assert_metric(uri, chart_data, "put")
+        self.assertEqual(rv.status_code, 200)
+        model = db.session.query(Slice).get(chart_id)
+
+        self.assertEqual(model.slice_name, new_name)
+        self.assertEqual(model.changed_by_url, "")
+
+        app.config["ENABLE_BROAD_ACTIVITY_ACCESS"] = access_flag
+        db.session.delete(model)
+        db.session.commit()
+
+    @pytest.mark.usefixtures("load_birth_names_dashboard_with_slices")
+    def test_chart_activity_access_enabled(self):
+        """
+        Chart API: Test ENABLE_BROAD_ACTIVITY_ACCESS = True
+        """
+        access_flag = app.config["ENABLE_BROAD_ACTIVITY_ACCESS"]
+        app.config["ENABLE_BROAD_ACTIVITY_ACCESS"] = True
+        admin = self.get_user("admin")
+        birth_names_table_id = SupersetTestCase.get_table(name="birth_names").id
+        chart_id = self.insert_chart("title", [admin.id], birth_names_table_id).id
+        chart_data = {
+            "slice_name": (new_name := "title1_changed"),
+        }
+        self.login(username="admin")
+        uri = f"api/v1/chart/{chart_id}"
+        rv = self.put_assert_metric(uri, chart_data, "put")
+        self.assertEqual(rv.status_code, 200)
+        model = db.session.query(Slice).get(chart_id)
+
+        self.assertEqual(model.slice_name, new_name)
+        self.assertEqual(model.changed_by_url, "/superset/profile/admin")
+
+        app.config["ENABLE_BROAD_ACTIVITY_ACCESS"] = access_flag
+        db.session.delete(model)
+        db.session.commit()
+
+    @pytest.mark.usefixtures("load_birth_names_dashboard_with_slices")
+    def test_chart_get_list_no_username(self):
+        """
+        Chart API: Tests that no username is returned
+        """
+        admin = self.get_user("admin")
+        birth_names_table_id = SupersetTestCase.get_table(name="birth_names").id
+        chart_id = self.insert_chart("title", [admin.id], birth_names_table_id).id
+        chart_data = {
+            "slice_name": (new_name := "title1_changed"),
+            "owners": [admin.id],
+        }
+        self.login(username="admin")
+        uri = f"api/v1/chart/{chart_id}"
+        rv = self.put_assert_metric(uri, chart_data, "put")
+        self.assertEqual(rv.status_code, 200)
+        model = db.session.query(Slice).get(chart_id)
+
+        response = self.get_assert_metric("api/v1/chart/", "get_list")
+        res = json.loads(response.data.decode("utf-8"))["result"]
+
+        current_chart = [d for d in res if d["id"] == chart_id][0]
+        self.assertEqual(current_chart["slice_name"], new_name)
+        self.assertNotIn("username", current_chart["changed_by"].keys())
+        self.assertNotIn("username", current_chart["owners"][0].keys())
+
+        db.session.delete(model)
+        db.session.commit()
+
+    @pytest.mark.usefixtures("load_birth_names_dashboard_with_slices")
+    def test_chart_get_no_username(self):
+        """
+        Chart API: Tests that no username is returned
+        """
+        admin = self.get_user("admin")
+        birth_names_table_id = SupersetTestCase.get_table(name="birth_names").id
+        chart_id = self.insert_chart("title", [admin.id], birth_names_table_id).id
+        chart_data = {
+            "slice_name": (new_name := "title1_changed"),
+            "owners": [admin.id],
+        }
+        self.login(username="admin")
+        uri = f"api/v1/chart/{chart_id}"
+        rv = self.put_assert_metric(uri, chart_data, "put")
+        self.assertEqual(rv.status_code, 200)
+        model = db.session.query(Slice).get(chart_id)
+
+        response = self.get_assert_metric(uri, "get")
+        res = json.loads(response.data.decode("utf-8"))["result"]
+
+        self.assertEqual(res["slice_name"], new_name)
+        self.assertNotIn("username", res["owners"][0].keys())
+
+        db.session.delete(model)
+        db.session.commit()
+
     def test_update_chart_new_owner_not_admin(self):
         """
         Chart API: Test update set new owner implicitly adds logged in owner
@@ -823,13 +930,13 @@ class TestChartApi(SupersetTestCase, ApiOwnersTestCaseMixin, InsertChartMixin):
             "owners": [
                 {
                     "id": 1,
-                    "username": "admin",
                     "first_name": "admin",
                     "last_name": "user",
                 }
             ],
             "params": None,
             "slice_name": "title",
+            "tags": [],
             "viz_type": None,
             "query_context": None,
             "is_managed_externally": False,
@@ -1252,6 +1359,75 @@ class TestChartApi(SupersetTestCase, ApiOwnersTestCaseMixin, InsertChartMixin):
             if res["id"] in users_favorite_ids:
                 assert res["value"]
 
+    def test_add_favorite(self):
+        """
+        Dataset API: Test add chart to favorites
+        """
+        chart = Slice(
+            id=100,
+            datasource_id=1,
+            datasource_type="table",
+            datasource_name="tmp_perm_table",
+            slice_name="slice_name",
+        )
+        db.session.add(chart)
+        db.session.commit()
+
+        self.login(username="admin")
+        uri = f"api/v1/chart/favorite_status/?q={prison.dumps([chart.id])}"
+        rv = self.client.get(uri)
+        data = json.loads(rv.data.decode("utf-8"))
+        for res in data["result"]:
+            assert res["value"] is False
+
+        uri = f"api/v1/chart/{chart.id}/favorites/"
+        self.client.post(uri)
+
+        uri = f"api/v1/chart/favorite_status/?q={prison.dumps([chart.id])}"
+        rv = self.client.get(uri)
+        data = json.loads(rv.data.decode("utf-8"))
+        for res in data["result"]:
+            assert res["value"] is True
+
+        db.session.delete(chart)
+        db.session.commit()
+
+    def test_remove_favorite(self):
+        """
+        Dataset API: Test remove chart from favorites
+        """
+        chart = Slice(
+            id=100,
+            datasource_id=1,
+            datasource_type="table",
+            datasource_name="tmp_perm_table",
+            slice_name="slice_name",
+        )
+        db.session.add(chart)
+        db.session.commit()
+
+        self.login(username="admin")
+        uri = f"api/v1/chart/{chart.id}/favorites/"
+        self.client.post(uri)
+
+        uri = f"api/v1/chart/favorite_status/?q={prison.dumps([chart.id])}"
+        rv = self.client.get(uri)
+        data = json.loads(rv.data.decode("utf-8"))
+        for res in data["result"]:
+            assert res["value"] is True
+
+        uri = f"api/v1/chart/{chart.id}/favorites/"
+        self.client.delete(uri)
+
+        uri = f"api/v1/chart/favorite_status/?q={prison.dumps([chart.id])}"
+        rv = self.client.get(uri)
+        data = json.loads(rv.data.decode("utf-8"))
+        for res in data["result"]:
+            assert res["value"] is False
+
+        db.session.delete(chart)
+        db.session.commit()
+
     def test_get_time_range(self):
         """
         Chart API: Test get actually time range from human readable string
@@ -1531,3 +1707,29 @@ class TestChartApi(SupersetTestCase, ApiOwnersTestCaseMixin, InsertChartMixin):
         self.assertEqual(rv.status_code, 200)
         data = json.loads(rv.data.decode("utf-8"))
         self.assertEqual(data["count"], 8)
+
+    @pytest.mark.usefixtures("create_charts")
+    def test_gets_owned_created_favorited_by_me_filter(self):
+        """
+        Chart API: Test ChartOwnedCreatedFavoredByMeFilter
+        """
+        self.login(username="admin")
+        arguments = {
+            "filters": [
+                {
+                    "col": "id",
+                    "opr": "chart_owned_created_favored_by_me",
+                    "value": True,
+                }
+            ],
+            "order_column": "slice_name",
+            "order_direction": "asc",
+            "page": 0,
+            "page_size": 25,
+        }
+        rv = self.client.get(f"api/v1/chart/?q={prison.dumps(arguments)}")
+        self.assertEqual(rv.status_code, 200)
+        data = json.loads(rv.data.decode("utf-8"))
+
+        assert data["result"][0]["slice_name"] == "name0"
+        assert data["result"][0]["datasource_id"] == 1

@@ -18,7 +18,7 @@
 
 import json
 import logging
-from typing import Iterator, Tuple
+from collections.abc import Iterator
 
 import yaml
 
@@ -34,16 +34,15 @@ logger = logging.getLogger(__name__)
 
 
 # keys present in the standard export that are not needed
-REMOVE_KEYS = ["datasource_type", "datasource_name", "url_params"]
+REMOVE_KEYS = ["datasource_type", "datasource_name", "query_context", "url_params"]
 
 
 class ExportChartsCommand(ExportModelsCommand):
-
     dao = ChartDAO
     not_found = ChartNotFoundError
 
     @staticmethod
-    def _export(model: Slice, export_related: bool = True) -> Iterator[Tuple[str, str]]:
+    def _export(model: Slice, export_related: bool = True) -> Iterator[tuple[str, str]]:
         file_name = get_filename(model.slice_name, model.id)
         file_path = f"charts/{file_name}.yaml"
 
