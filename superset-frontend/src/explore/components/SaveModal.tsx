@@ -55,6 +55,7 @@ interface SaveModalProps extends RouteComponentProps {
   actions: Record<string, any>;
   form_data?: Record<string, any>;
   user: UserWithPermissionsAndRoles;
+  canOverwrite: boolean;
   alert?: string;
   sliceName?: string;
   slice?: Record<string, any>;
@@ -525,6 +526,7 @@ function mapStateToProps({
     dashboards: saveModal.dashboards,
     alert: saveModal.saveModalAlert,
     isVisible: saveModal.isVisible,
+    canOverwrite: saveModal.canOverwrite,
   };
 }
 
