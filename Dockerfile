@@ -22,11 +22,12 @@ ARG PY_VER=3.9.16-slim
 
 # if BUILDPLATFORM is null, set it to 'amd64' (or leave as is otherwise).
 ARG BUILDPLATFORM=${BUILDPLATFORM:-amd64}
-FROM --platform=${BUILDPLATFORM} node:16-slim AS superset-node
+FROM --platform=${BUILDPLATFORM} nikolaik/python-nodejs:python3.8-nodejs16-slim AS superset-node
 
 ARG NPM_BUILD_CMD="build"
 ENV BUILD_CMD=${NPM_BUILD_CMD}
 ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true
+ENV PYTHON_VERSION=${PY_VER}
 
 # NPM ci first, as to NOT invalidate previous steps except for when package.json changes
 RUN mkdir -p /app/superset-frontend
@@ -35,6 +36,13 @@ COPY ./docker/frontend-mem-nag.sh /
 RUN /frontend-mem-nag.sh
 
 WORKDIR /app/superset-frontend/
+
+# RUN apt-get update -y \
+#     # && apt-get install -y --no-install-recommends software-properties-common \
+#     # && add-apt-repository ppa:deadsnakes/ppa \
+#     && apt-get install -y python3.6
+
+RUN apt-get update -y && apt-get install -y build-essential
 
 COPY superset-frontend/package*.json ./
 RUN npm ci
@@ -68,6 +76,7 @@ RUN mkdir -p ${PYTHONPATH} \
         libsasl2-modules-gssapi-mit \
         libpq-dev \
         libecpg-dev \
+        git \
     && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app

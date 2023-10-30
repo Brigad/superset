@@ -33,6 +33,7 @@ import {
   hasGenericChartAxes,
   NO_TIME_RANGE,
   QueryFormColumn,
+  ensureIsArray,
 } from '@superset-ui/core';
 import {
   getFormDataFromControls,
