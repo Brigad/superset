@@ -21,6 +21,7 @@ from typing import Any, Optional
 from packaging.version import Version
 from sqlalchemy import types
 
+from superset.constants import TimeGrain
 from superset.db_engine_specs.base import BaseEngineSpec
 from superset.db_engine_specs.exceptions import (
     SupersetDBAPIDatabaseError,
@@ -35,19 +36,23 @@ class ElasticSearchEngineSpec(BaseEngineSpec):  # pylint: disable=abstract-metho
     engine = "elasticsearch"
     engine_name = "ElasticSearch (SQL API)"
     time_groupby_inline = True
-    time_secondary_columns = True
     allows_joins = False
     allows_subqueries = True
     allows_sql_comments = False
 
+    _date_trunc_functions = {
+        "DATETIME": "DATE_TRUNC",
+    }
+
     _time_grain_expressions = {
         None: "{col}",
-        "PT1S": "HISTOGRAM({col}, INTERVAL 1 SECOND)",
-        "PT1M": "HISTOGRAM({col}, INTERVAL 1 MINUTE)",
-        "PT1H": "HISTOGRAM({col}, INTERVAL 1 HOUR)",
-        "P1D": "HISTOGRAM({col}, INTERVAL 1 DAY)",
-        "P1M": "HISTOGRAM({col}, INTERVAL 1 MONTH)",
-        "P1Y": "HISTOGRAM({col}, INTERVAL 1 YEAR)",
+        TimeGrain.SECOND: "{func}('second', {col})",
+        TimeGrain.MINUTE: "{func}('minute', {col})",
+        TimeGrain.HOUR: "{func}('hour', {col})",
+        TimeGrain.DAY: "{func}('day', {col})",
+        TimeGrain.WEEK: "{func}('week', {col})",
+        TimeGrain.MONTH: "{func}('month', {col})",
+        TimeGrain.YEAR: "{func}('year', {col})",
     }
 
     type_code_map: dict[int, str] = {}  # loaded from get_datatype only if needed
@@ -97,19 +102,18 @@ class ElasticSearchEngineSpec(BaseEngineSpec):  # pylint: disable=abstract-metho
 
 class OpenDistroEngineSpec(BaseEngineSpec):  # pylint: disable=abstract-method
     time_groupby_inline = True
-    time_secondary_columns = True
     allows_joins = False
     allows_subqueries = True
     allows_sql_comments = False
 
     _time_grain_expressions = {
         None: "{col}",
-        "PT1S": "date_format({col}, 'yyyy-MM-dd HH:mm:ss.000')",
-        "PT1M": "date_format({col}, 'yyyy-MM-dd HH:mm:00.000')",
-        "PT1H": "date_format({col}, 'yyyy-MM-dd HH:00:00.000')",
-        "P1D": "date_format({col}, 'yyyy-MM-dd 00:00:00.000')",
-        "P1M": "date_format({col}, 'yyyy-MM-01 00:00:00.000')",
-        "P1Y": "date_format({col}, 'yyyy-01-01 00:00:00.000')",
+        TimeGrain.SECOND: "date_format({col}, 'yyyy-MM-dd HH:mm:ss.000')",
+        TimeGrain.MINUTE: "date_format({col}, 'yyyy-MM-dd HH:mm:00.000')",
+        TimeGrain.HOUR: "date_format({col}, 'yyyy-MM-dd HH:00:00.000')",
+        TimeGrain.DAY: "date_format({col}, 'yyyy-MM-dd 00:00:00.000')",
+        TimeGrain.MONTH: "date_format({col}, 'yyyy-MM-01 00:00:00.000')",
+        TimeGrain.YEAR: "date_format({col}, 'yyyy-01-01 00:00:00.000')",
     }
 
     engine = "odelasticsearch"

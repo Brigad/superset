@@ -646,7 +646,7 @@
       "Cell content": ["Contenido de la celda"],
       "Certification details": [""],
       "Certified by": ["Certificado por"],
-      "Certified by %s": ["Certidicado por %s"],
+      "Certified by %s": ["Certificado por %s"],
       "Change order of columns.": [""],
       "Change order of rows.": [""],
       "Changed By": ["Cambiado por"],
@@ -2143,12 +2143,6 @@
       "Pick a granularity in the Time section or uncheck 'Include Time'": [
         "Elige una granularidad en la sección de tiempo o desmarca 'Incluir tiempo'"
       ],
-      "Pick a metric for left axis!": [
-        "Elige una métrica para el eje izquierdo!"
-      ],
-      "Pick a metric for right axis!": [
-        "Elige una métrica para el eje derecho!"
-      ],
       "Pick a metric for x, y and size": [
         "Elige una métrica para 'x', 'y' y 'tamaño'"
       ],
@@ -2253,7 +2247,6 @@
       "Predicate applied when fetching distinct value to populate the filter control component. Supports jinja template syntax. Applies only when `Enable Filter Select` is on.": [
         "El predicado aplicado al obtener un valor distinto para rellenar el componente de control de filtro. Soporta la sintaxis de la plantilla jinja. Se aplica solo cuando `Habilitar selección de filtro` está activado."
       ],
-      "Prefix metric name with slice name": [""],
       "Preview": ["Previsualizar"],
       "Preview: `%s`": ["Previsualizar: `%s`"],
       "Previous": ["Anterior"],
@@ -2665,9 +2658,6 @@
       "Showing %s of %s": ["Mostrando %s de %s"],
       "Shows a list of all series available at that point in time": [""],
       "Shows or hides markers for the time series": [""],
-      "Shows the composition of a dataset by segmenting a given rectangle as smaller rectangles with areas proportional to their value or contribution to the whole. Those rectangles may also, in turn, be further segmented hierarchically.": [
-        ""
-      ],
       "Significance Level": [""],
       "Simple": [""],
       "Simple ad-hoc metrics are not enabled for this dataset": [""],
@@ -2819,7 +2809,6 @@
       "Take your data points, and group them into \"bins\" to see where the densest areas of information lie": [
         ""
       ],
-      "Target aspect ratio for treemap tiles.": [""],
       "Template Name": ["Nombre Plantilla"],
       "Template parameters": ["Parametros de plantilla"],
       "Templated link, it's possible to include {{ metric }} or other values coming from the controls.": [
@@ -2938,7 +2927,7 @@
       "The number of hours, negative or positive, to shift the time column. This can be used to move UTC time to local time.": [
         ""
       ],
-      "The number of results displayed is limited to %(rows)d by the configuration DISPLAY_MAX_ROWS. Please add additional limits/filters or download to csv to see more rows up to the %(limit)d limit.": [
+      "The number of results displayed is limited to %(rows)d by the configuration DISPLAY_MAX_ROW. Please add additional limits/filters or download to csv to see more rows up to the %(limit)d limit.": [
         ""
       ],
       "The number of results displayed is limited to %(rows)d. Please add additional limits/filters, download to csv, or contact an admin to see more rows up to the %(limit)d limit.": [
@@ -3261,13 +3250,7 @@
       "Thursday": ["Jueves"],
       "Time": ["Tiempo"],
       "Time Series - Bar Chart": ["Serie Temporal - Gráfico de Barras"],
-      "Time Series - Dual Axis Line Chart": [
-        "Serie Temporal - Gráfico de líneas de doble eje"
-      ],
       "Time Series - Line Chart": ["Serie Temporal - Gráfico de Líneas"],
-      "Time Series - Multiple Line Charts": [
-        "Serie temportal - Gráfico de múltiples líneas"
-      ],
       "Time Series - Nightingale Rose Chart": [
         "Serie Temporal - Gráfico de Nightingale Rose"
       ],
@@ -3344,7 +3327,6 @@
       "Transpose pivot": ["Transponer pivot"],
       "Tree layout": [""],
       "Treemap": ["Mapa de Árbol"],
-      "Treemap (legacy)": [""],
       "Triangle": ["Triángulo"],
       "Trigger Alert If...": ["Disparar Alerta si..."],
       "Truncate Y Axis": ["Truncar el eje Y"],
@@ -3553,13 +3535,7 @@
       "Visualize two different series using the same x-axis. Note that both series can be visualized with a different chart type (e.g. 1 using bars and 1 using a line).": [
         ""
       ],
-      "Visualize two different time series using the same x-axis time range. This chart is being deprecated and we recommend using the Mixed Timeseries Chart instead!": [
-        ""
-      ],
       "Visualize two different time series using the same x-axis. Note that each time series can be visualized differently (e.g. 1 using bars and 1 using a line).": [
-        ""
-      ],
-      "Visualizes 2 metrics as line plots using the same x-axis. This chart is useful for comparing metrics across the same time range.": [
         ""
       ],
       "Visualizes a metric across three dimensions of data in a single chart (X axis, Y axis, and bubble size). Bubbles from the same group can be showcased using bubble color.": [
@@ -3752,14 +3728,10 @@
       "Y AXIS TITLE MARGIN": [""],
       "Y AXIS TITLE POSITION": [""],
       "Y Axis": ["Eje Y"],
-      "Y Axis 1": [""],
-      "Y Axis 2": [""],
       "Y Axis 2 Bounds": [""],
       "Y Axis Bounds": [""],
       "Y Axis Format": ["Formato Eje Y"],
       "Y Axis Label": [""],
-      "Y Axis Left": [""],
-      "Y Axis Right": [""],
       "Y Axis Title": [""],
       "Y Log Scale": [""],
       "Y bounds": [""],

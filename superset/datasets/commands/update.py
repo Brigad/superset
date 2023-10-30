@@ -18,20 +18,19 @@ import logging
 from collections import Counter
 from typing import Any, Optional
 
-from flask import current_app
 from flask_appbuilder.models.sqla import Model
 from marshmallow import ValidationError
 
 from superset import security_manager
 from superset.commands.base import BaseCommand, UpdateMixin
 from superset.connectors.sqla.models import SqlaTable
-from superset.dao.exceptions import DAOUpdateFailedError
+from superset.daos.dataset import DatasetDAO
+from superset.daos.exceptions import DAOUpdateFailedError
 from superset.datasets.commands.exceptions import (
     DatabaseChangeValidationError,
     DatasetColumnNotFoundValidationError,
     DatasetColumnsDuplicateValidationError,
     DatasetColumnsExistsValidationError,
-    DatasetEndpointUnsafeValidationError,
     DatasetExistsValidationError,
     DatasetForbiddenError,
     DatasetInvalidError,
@@ -41,9 +40,7 @@ from superset.datasets.commands.exceptions import (
     DatasetNotFoundError,
     DatasetUpdateFailedError,
 )
-from superset.datasets.dao import DatasetDAO
 from superset.exceptions import SupersetSecurityException
-from superset.utils.urls import is_safe_url
 
 logger = logging.getLogger(__name__)
 
@@ -66,8 +63,8 @@ class UpdateDatasetCommand(UpdateMixin, BaseCommand):
         if self._model:
             try:
                 dataset = DatasetDAO.update(
-                    model=self._model,
-                    properties=self._properties,
+                    self._model,
+                    attributes=self._properties,
                 )
                 return dataset
             except DAOUpdateFailedError as ex:
@@ -92,7 +89,10 @@ class UpdateDatasetCommand(UpdateMixin, BaseCommand):
         table_name = self._properties.get("table_name", None)
         # Validate uniqueness
         if not DatasetDAO.validate_update_uniqueness(
-            self._model.database_id, self._model_id, table_name
+            self._model.database_id,
+            self._model.schema,
+            self._model_id,
+            table_name,
         ):
             exceptions.append(DatasetExistsValidationError(table_name))
         # Validate/Populate database not allowed to change
@@ -104,15 +104,6 @@ class UpdateDatasetCommand(UpdateMixin, BaseCommand):
             self._properties["owners"] = owners
         except ValidationError as ex:
             exceptions.append(ex)
-        # Validate default URL safety
-        default_endpoint = self._properties.get("default_endpoint")
-        if (
-            default_endpoint
-            and not is_safe_url(default_endpoint)
-            and current_app.config["PREVENT_UNSAFE_DEFAULT_URLS_ON_DATASET"]
-        ):
-            exceptions.append(DatasetEndpointUnsafeValidationError())
-
         # Validate columns
         if columns := self._properties.get("columns"):
             self._validate_columns(columns, exceptions)

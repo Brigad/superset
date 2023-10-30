@@ -2096,12 +2096,6 @@
       "Pick a granularity in the Time section or uncheck 'Include Time'": [
         "Escolha uma granularidade na secção Tempo ou desmarque 'Incluir hora'"
       ],
-      "Pick a metric for left axis!": [
-        "Selecione uma métrica para o eixo esquerdo!"
-      ],
-      "Pick a metric for right axis!": [
-        "Selecione uma métrica para o eixo direito!"
-      ],
       "Pick a metric for x, y and size": [
         "Selecione uma métrica para x, y e tamanho"
       ],
@@ -2204,7 +2198,6 @@
         "Predicado aplicado ao obter um valor distinto para preencher a componente de controlo de filtro. Suporta a sintaxe jinja standard. Apenas se aplica quando \"Ativar Filtro de Seleção\" está ativado."
       ],
       "Predictive Analytics": [""],
-      "Prefix metric name with slice name": [""],
       "Preview": ["Pré-visualização para %s"],
       "Preview: `%s`": ["Pré-visualização para %s"],
       "Previous": ["Pré-visualização para %s"],
@@ -2611,9 +2604,6 @@
       "Showing %s of %s": [""],
       "Shows a list of all series available at that point in time": [""],
       "Shows or hides markers for the time series": [""],
-      "Shows the composition of a dataset by segmenting a given rectangle as smaller rectangles with areas proportional to their value or contribution to the whole. Those rectangles may also, in turn, be further segmented hierarchically.": [
-        ""
-      ],
       "Significance Level": [""],
       "Simple": [""],
       "Simple ad-hoc metrics are not enabled for this dataset": [""],
@@ -2787,7 +2777,6 @@
       "Take your data points, and group them into \"bins\" to see where the densest areas of information lie": [
         ""
       ],
-      "Target aspect ratio for treemap tiles.": [""],
       "Target category": [""],
       "Target value": [""],
       "Template Name": ["Nome do modelo"],
@@ -2916,7 +2905,7 @@
       "The number of hours, negative or positive, to shift the time column. This can be used to move UTC time to local time.": [
         ""
       ],
-      "The number of results displayed is limited to %(rows)d by the configuration DISPLAY_MAX_ROWS. Please add additional limits/filters or download to csv to see more rows up to the %(limit)d limit.": [
+      "The number of results displayed is limited to %(rows)d by the configuration DISPLAY_MAX_ROW. Please add additional limits/filters or download to csv to see more rows up to the %(limit)d limit.": [
         ""
       ],
       "The number of results displayed is limited to %(rows)d. Please add additional limits/filters, download to csv, or contact an admin to see more rows up to the %(limit)d limit.": [
@@ -3209,13 +3198,7 @@
       "Time Comparison": ["Coluna de tempo"],
       "Time Range": ["Granularidade Temporal"],
       "Time Series - Bar Chart": ["Série Temporal - Gráfico de barras"],
-      "Time Series - Dual Axis Line Chart": [
-        "Série Temporal - Gráfico de linha de dois eixos"
-      ],
       "Time Series - Line Chart": ["Série Temporal - Gráfico de linhas"],
-      "Time Series - Multiple Line Charts": [
-        "Série Temporal - Gráfico de linhas"
-      ],
       "Time Series - Nightingale Rose Chart": [
         "Série Temporal - Gráfico de linhas"
       ],
@@ -3282,6 +3265,7 @@
       "Top left": [""],
       "Top right": [""],
       "Top to Bottom": [""],
+      "Total": [""],
       "Total (%(aggfunc)s)": [""],
       "Total (%(aggregatorName)s)": [""],
       "Total: %s": [""],
@@ -3291,7 +3275,6 @@
       "Transpose pivot": [""],
       "Tree layout": [""],
       "Treemap": ["Treemap"],
-      "Treemap (legacy)": [""],
       "Trend": [""],
       "Triangle": [""],
       "Trigger Alert If...": [""],
@@ -3370,6 +3353,7 @@
       "Unknown column used in orderby: %(col)s": [""],
       "Unknown error": [""],
       "Unknown input format": [""],
+      "Unknown type": [""],
       "Unknown value": [""],
       "Unsafe return type for function %(func)s: %(value_type)s": [""],
       "Unsafe template value for key %(key)s: %(value_type)s": [""],
@@ -3478,13 +3462,7 @@
       "Visualize two different series using the same x-axis. Note that both series can be visualized with a different chart type (e.g. 1 using bars and 1 using a line).": [
         ""
       ],
-      "Visualize two different time series using the same x-axis time range. This chart is being deprecated and we recommend using the Mixed Timeseries Chart instead!": [
-        ""
-      ],
       "Visualize two different time series using the same x-axis. Note that each time series can be visualized differently (e.g. 1 using bars and 1 using a line).": [
-        ""
-      ],
-      "Visualizes 2 metrics as line plots using the same x-axis. This chart is useful for comparing metrics across the same time range.": [
         ""
       ],
       "Visualizes a metric across three dimensions of data in a single chart (X axis, Y axis, and bubble size). Bubbles from the same group can be showcased using bubble color.": [
@@ -3683,14 +3661,10 @@
       "Y AXIS TITLE MARGIN": [""],
       "Y AXIS TITLE POSITION": [""],
       "Y Axis": ["Eixo YY"],
-      "Y Axis 1": [""],
-      "Y Axis 2": [""],
       "Y Axis 2 Bounds": [""],
       "Y Axis Bounds": [""],
       "Y Axis Format": ["Formato do Eixo YY"],
       "Y Axis Label": [""],
-      "Y Axis Left": [""],
-      "Y Axis Right": [""],
       "Y Axis Title": [""],
       "Y Log Scale": [""],
       "Y bounds": [""],

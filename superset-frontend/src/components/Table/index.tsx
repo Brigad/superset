@@ -145,6 +145,17 @@ export interface TableProps<RecordType> {
    * Returns props that should be applied to each row component.
    */
   onRow?: AntTableProps<RecordType>['onRow'];
+  /**
+   * Will render html safely if set to true, anchor tags and such. Currently
+   * only supported for virtualize == true
+   */
+  allowHTML?: boolean;
+
+  /**
+   * The column that contains children to display.
+   * Check https://ant.design/components/table#table for more details.
+   */
+  childrenColumnName?: string;
 }
 
 const defaultRowSelection: React.Key[] = [];
@@ -178,6 +189,10 @@ const StyledTable = styled(AntTable)<{ height?: number }>(
 
     .ant-pagination-item-active {
       border-color: ${theme.colors.primary.base};
+    }
+
+    .ant-table.ant-table-small {
+      font-size: ${theme.typography.sizes.s}px;
     }
   `,
 );
@@ -249,6 +264,8 @@ export function Table<RecordType extends object>(
     onChange = noop,
     recordCount,
     onRow,
+    allowHTML = false,
+    childrenColumnName,
   } = props;
 
   const wrapperRef = useRef<HTMLDivElement | null>(null);
@@ -382,6 +399,9 @@ export function Table<RecordType extends object>(
     theme,
     height: bodyHeight,
     bordered,
+    expandable: {
+      childrenColumnName,
+    },
   };
 
   return (
@@ -405,6 +425,7 @@ export function Table<RecordType extends object>(
                 scrollToFirstRowOnChange: false,
               }),
             }}
+            allowHTML={allowHTML}
           />
         )}
       </div>

@@ -887,7 +887,6 @@
       ],
       "Choose a database...": [""],
       "Choose a dataset": ["Kies een dataset"],
-      "Choose a metric for left axis": [""],
       "Choose a metric for right axis": [
         "Kies een meeteenheid voor de rechteras"
       ],
@@ -897,8 +896,6 @@
       "Choose a target": [""],
       "Choose chart type": [""],
       "Choose one of the available databases from the panel on the left.": [""],
-      "Choose one or more charts for left axis": [""],
-      "Choose one or more charts for right axis": [""],
       "Choose the annotation layer type": ["Kies het aantekeningenlaagtype"],
       "Choose the format for legend values": [""],
       "Choose the position of the legend": [""],
@@ -2141,7 +2138,6 @@
       "Least recently modified": ["Meest recente wijziging"],
       "Left": [""],
       "Left Axis Format": [""],
-      "Left Axis Metric": [""],
       "Left Axis chart(s)": [""],
       "Left Margin": [""],
       "Left margin, in pixels, allowing for more room for axis labels": [""],
@@ -2338,7 +2334,6 @@
       "Multi-Levels": [""],
       "Multi-Variables": [""],
       "Multiple": [""],
-      "Multiple Line Charts": [""],
       "Multiple file extensions are not allowed for columnar uploads. Please make sure all files are of the same extension.": [
         ""
       ],
@@ -2669,12 +2664,6 @@
       "Pick a granularity in the Time section or uncheck 'Include Time'": [
         "Kies een granulariteit in de sectie Tijd of vink ‘Inclusief tijd’ uit"
       ],
-      "Pick a metric for left axis!": [
-        "Kies een meeteenheid voor de linkeras!"
-      ],
-      "Pick a metric for right axis!": [
-        "Kies een meeteenheid voor de rechteras!"
-      ],
       "Pick a metric for x, y and size": [
         "Kies een meeteenheid voor x, y en grootte"
       ],
@@ -2796,7 +2785,6 @@
       ],
       "Predictive": [""],
       "Predictive Analytics": [""],
-      "Prefix metric name with slice name": [""],
       "Preview": ["Preview"],
       "Preview: `%s`": ["Preview: `%s`"],
       "Previous": ["Vorige"],
@@ -2994,7 +2982,6 @@
       "Right": [""],
       "Right Axis Format": [""],
       "Right Axis Metric": [""],
-      "Right Axis chart(s)": [""],
       "Right axis metric": ["Meeteenheid rechteras"],
       "Right to Left": [""],
       "Right value": [""],
@@ -3314,9 +3301,6 @@
       "Showing %s of %s": ["Weergave %s van %s"],
       "Shows a list of all series available at that point in time": [""],
       "Shows or hides markers for the time series": [""],
-      "Shows the composition of a dataset by segmenting a given rectangle as smaller rectangles with areas proportional to their value or contribution to the whole. Those rectangles may also, in turn, be further segmented hierarchically.": [
-        ""
-      ],
       "Significance Level": [""],
       "Simple": ["Eenvoudig"],
       "Simple ad-hoc metrics are not enabled for this dataset": [""],
@@ -3525,7 +3509,6 @@
       ],
       "Target": [""],
       "Target Color": [""],
-      "Target aspect ratio for treemap tiles.": [""],
       "Target category": [""],
       "Target value": [""],
       "Template Name": ["Template Naam"],
@@ -3679,7 +3662,7 @@
       "The number of hours, negative or positive, to shift the time column. This can be used to move UTC time to local time.": [
         ""
       ],
-      "The number of results displayed is limited to %(rows)d by the configuration DISPLAY_MAX_ROWS. Please add additional limits/filters or download to csv to see more rows up to the %(limit)d limit.": [
+      "The number of results displayed is limited to %(rows)d by the configuration DISPLAY_MAX_ROW. Please add additional limits/filters or download to csv to see more rows up to the %(limit)d limit.": [
         ""
       ],
       "The number of results displayed is limited to %(rows)d. Please add additional limits/filters, download to csv, or contact an admin to see more rows up to the %(limit)d limit.": [
@@ -4055,13 +4038,7 @@
       "Time Range": [""],
       "Time Series": [""],
       "Time Series - Bar Chart": ["Tijdreeks - Staafdiagram"],
-      "Time Series - Dual Axis Line Chart": [
-        "Tijdreeks - lijngrafiek met twee assen"
-      ],
       "Time Series - Line Chart": ["Tijdreeks - Lijngrafiek"],
-      "Time Series - Multiple Line Charts": [
-        "Tijdreeksen - Meervoudige lijndiagrammen"
-      ],
       "Time Series - Nightingale Rose Chart": [
         "Tijdreeks - Nightingale Rose grafiek"
       ],
@@ -4153,6 +4130,7 @@
       "Top": [""],
       "Top right": [""],
       "Top to Bottom": [""],
+      "Total": [""],
       "Total (%(aggfunc)s)": [""],
       "Total (%(aggregatorName)s)": [""],
       "Total: %s": [""],
@@ -4165,7 +4143,6 @@
       "Tree layout": [""],
       "Tree orientation": [""],
       "Treemap": ["Treemap"],
-      "Treemap (legacy)": [""],
       "Trend": [""],
       "Triangle": [""],
       "Trigger Alert If...": ["Trigger waarschuwing als…"],
@@ -4397,13 +4374,7 @@
       "Visualize two different series using the same x-axis. Note that both series can be visualized with a different chart type (e.g. 1 using bars and 1 using a line).": [
         ""
       ],
-      "Visualize two different time series using the same x-axis time range. This chart is being deprecated and we recommend using the Mixed Timeseries Chart instead!": [
-        ""
-      ],
       "Visualize two different time series using the same x-axis. Note that each time series can be visualized differently (e.g. 1 using bars and 1 using a line).": [
-        ""
-      ],
-      "Visualizes 2 metrics as line plots using the same x-axis. This chart is useful for comparing metrics across the same time range.": [
         ""
       ],
       "Visualizes a metric across three dimensions of data in a single chart (X axis, Y axis, and bubble size). Bubbles from the same group can be showcased using bubble color.": [
@@ -4617,14 +4588,10 @@
       "Y AXIS TITLE MARGIN": [""],
       "Y AXIS TITLE POSITION": [""],
       "Y Axis": ["Y As"],
-      "Y Axis 1": [""],
-      "Y Axis 2": [""],
       "Y Axis 2 Bounds": [""],
       "Y Axis Bounds": [""],
       "Y Axis Format": ["Y-as Formaat"],
       "Y Axis Label": [""],
-      "Y Axis Left": [""],
-      "Y Axis Right": [""],
       "Y Axis Title": [""],
       "Y Log Scale": [""],
       "Y bounds": [""],

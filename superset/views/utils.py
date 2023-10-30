@@ -14,6 +14,7 @@
 # KIND, either express or implied.  See the License for the
 # specific language governing permissions and limitations
 # under the License.
+import contextlib
 import logging
 from collections import defaultdict
 from functools import wraps
@@ -33,7 +34,7 @@ from werkzeug.wrappers.response import Response
 import superset.models.core as models
 from superset import app, dataframe, db, result_set, viz
 from superset.common.db_query_status import QueryStatus
-from superset.datasource.dao import DatasourceDAO
+from superset.daos.datasource import DatasourceDAO
 from superset.errors import ErrorLevel, SupersetError, SupersetErrorType
 from superset.exceptions import (
     CacheLoadError,
@@ -254,13 +255,12 @@ def get_datasource_info(
     This function allows supporting both without duplicating code
 
     :param datasource_id: The datasource ID
-    :param datasource_type: The datasource type, i.e., 'druid' or 'table'
+    :param datasource_type: The datasource type
     :param form_data: The URL form data
     :returns: The datasource ID and type
     :raises SupersetException: If the datasource no longer exists
     """
 
-    # pylint: disable=superfluous-parens
     if "__" in (datasource := form_data.get("datasource", "")):
         datasource_id, datasource_type = datasource.split("__")
         # The case where the datasource has been deleted
@@ -324,7 +324,7 @@ def get_dashboard_extra_filters(
     ):
         return []
 
-    try:
+    with contextlib.suppress(json.JSONDecodeError):
         # does this dashboard have default filters?
         json_metadata = json.loads(dashboard.json_metadata)
         default_filters = json.loads(json_metadata.get("default_filters", "null"))
@@ -341,9 +341,6 @@ def get_dashboard_extra_filters(
             and isinstance(default_filters, dict)
         ):
             return build_extra_filters(layout, filter_scopes, default_filters, slice_id)
-    except json.JSONDecodeError:
-        pass
-
     return []
 
 
@@ -468,7 +465,7 @@ def check_datasource_perms(
     This function takes `self` since it must have the same signature as the
     the decorated method.
 
-    :param datasource_type: The datasource type, i.e., 'druid' or 'table'
+    :param datasource_type: The datasource type
     :param datasource_id: The datasource ID
     :raises SupersetSecurityException: If the user cannot access the resource
     """
@@ -516,39 +513,6 @@ def check_datasource_perms(
     viz_obj.raise_for_access()
 
 
-def check_slice_perms(_self: Any, slice_id: int) -> None:
-    """
-    Check if user can access a cached response from slice_json.
-
-    This function takes `self` since it must have the same signature as the
-    the decorated method.
-
-    :param slice_id: The slice ID
-    :raises SupersetSecurityException: If the user cannot access the resource
-    """
-
-    form_data, slc = get_form_data(slice_id, use_slice_data=True)
-
-    if slc and slc.datasource:
-        try:
-            viz_obj = get_viz(
-                datasource_type=slc.datasource.type,
-                datasource_id=slc.datasource.id,
-                form_data=form_data,
-                force=False,
-            )
-        except NoResultFound as ex:
-            raise SupersetSecurityException(
-                SupersetError(
-                    error_type=SupersetErrorType.UNKNOWN_DATASOURCE_TYPE_ERROR,
-                    level=ErrorLevel.ERROR,
-                    message="Could not find viz object",
-                )
-            ) from ex
-
-        viz_obj.raise_for_access()
-
-
 def _deserialize_results_payload(
     payload: Union[bytes, str], query: Query, use_msgpack: Optional[bool] = False
 ) -> dict[str, Any]:
@@ -568,6 +532,10 @@ def _deserialize_results_payload(
 
         df = result_set.SupersetResultSet.convert_table_to_df(pa_table)
         ds_payload["data"] = dataframe.df_to_records(df) or []
+
+        for column in ds_payload["selected_columns"]:
+            if "name" in column:
+                column["column_name"] = column.get("name")
 
         db_engine_spec = query.database.db_engine_spec
         all_columns, data, expanded_columns = db_engine_spec.expand_data(

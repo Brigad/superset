@@ -1175,9 +1175,6 @@
       ],
       "Choose a database...": ["Wählen Sie eine Datenbank..."],
       "Choose a dataset": ["Datensatz auswählen"],
-      "Choose a metric for left axis": [
-        "Wählen Sie eine Metrik für die linke Achse"
-      ],
       "Choose a metric for right axis": [
         "Wählen Sie eine Metrik für die rechte Achse"
       ],
@@ -1188,12 +1185,6 @@
       "Choose chart type": ["Diagrammtyp auswählen"],
       "Choose one of the available databases from the panel on the left.": [
         "Wählen Sie einen der verfügbaren Datensätze aus dem Bereich auf der linken Seite."
-      ],
-      "Choose one or more charts for left axis": [
-        "Wählen Sie ein oder mehrere Diagramme die rechte Achse"
-      ],
-      "Choose one or more charts for right axis": [
-        "Wählen Sie ein oder mehrerer Diagramme für die rechte Achse"
       ],
       "Choose the annotation layer type": [
         "Auswählen des Anmerkungsebenen-Typs"
@@ -2782,7 +2773,6 @@
       "Least recently modified": ["Zuletzt geändert"],
       "Left": ["Links"],
       "Left Axis Format": ["Format der linken Achse"],
-      "Left Axis Metric": ["Metrik linke Achse"],
       "Left Axis chart(s)": ["Diagramm(e) der linken Achse"],
       "Left Margin": ["Linker Abstand"],
       "Left margin, in pixels, allowing for more room for axis labels": [
@@ -3056,7 +3046,6 @@
       "Multi-Levels": ["Mehrstufige"],
       "Multi-Variables": ["Multi-Variablen"],
       "Multiple": ["Mehrfach"],
-      "Multiple Line Charts": ["Mehr-Liniendiagramme"],
       "Multiple file extensions are not allowed for columnar uploads. Please make sure all files are of the same extension.": [
         "Unterschiedliche Dateierweiterungen sind für spaltenförmige Uploads nicht zulässig. Bitte stellen Sie sicher, dass alle Dateien die gleiche Erweiterung haben."
       ],
@@ -3521,12 +3510,6 @@
       "Pick a granularity in the Time section or uncheck 'Include Time'": [
         "Wählen Sie eine Granularität im Abschnitt Zeit aus oder deaktivieren Sie \"Zeit einschließen\"."
       ],
-      "Pick a metric for left axis!": [
-        "Wählen Sie eine Metrik für die linke Achse!"
-      ],
-      "Pick a metric for right axis!": [
-        "Wählen Sie eine Metrik für die rechte Achse!"
-      ],
       "Pick a metric for x, y and size": [
         "Wählen Sie eine Metrik für x, y und Größe"
       ],
@@ -3686,9 +3669,6 @@
       ],
       "Predictive": ["Prädikativ"],
       "Predictive Analytics": ["Prädiktive Analysen"],
-      "Prefix metric name with slice name": [
-        "Metrikname den Slice-Namen voranstellen"
-      ],
       "Preview": ["Vorschau"],
       "Preview: `%s`": ["Vorschau: `%s"],
       "Previous": ["Zurück"],
@@ -3930,7 +3910,6 @@
       "Right": ["Rechts"],
       "Right Axis Format": ["Format der rechten Achse"],
       "Right Axis Metric": ["Metrik der rechten Achse"],
-      "Right Axis chart(s)": ["Diagramm(e) der rechten Achse"],
       "Right axis metric": ["Metrik der rechten Achse"],
       "Right to Left": ["Rechts nach links"],
       "Right value": ["Rechter Wert"],
@@ -4385,9 +4364,6 @@
       "Shows or hides markers for the time series": [
         "Ein- oder Ausblenden von Markern für die Zeitreihe"
       ],
-      "Shows the composition of a dataset by segmenting a given rectangle as smaller rectangles with areas proportional to their value or contribution to the whole. Those rectangles may also, in turn, be further segmented hierarchically.": [
-        "Zeigt die Zusammensetzung eines Datensatzes an, indem ein bestimmtes Rechteck als kleinere Rechtecke mit Bereichen segmentiert wird, die proportional zu ihrem Wert oder Beitrag zum Ganzen sind. Diese Rechtecke können wiederum auch hierarchisch weiter segmentiert werden."
-      ],
       "Significance Level": ["Signifikanzniveau"],
       "Simple": ["Einfach"],
       "Simple ad-hoc metrics are not enabled for this dataset": [
@@ -4670,9 +4646,6 @@
       ],
       "Target": ["Ziel"],
       "Target Color": ["Zielfarbe"],
-      "Target aspect ratio for treemap tiles.": [
-        "Ziel-Seitenverhältnis für Treemap-Kacheln."
-      ],
       "Target category": ["Zielkategorie"],
       "Target value": ["Zielwert"],
       "Template Name": ["Vorlagenname"],
@@ -4854,8 +4827,8 @@
       "The number of hours, negative or positive, to shift the time column. This can be used to move UTC time to local time.": [
         "Die Anzahl der Stunden, negativ oder positiv, um die Zeitspalte zu verschieben. Dies kann verwendet werden, um die UTC-Zeit auf die Ortszeit zu verschieben."
       ],
-      "The number of results displayed is limited to %(rows)d by the configuration DISPLAY_MAX_ROWS. Please add additional limits/filters or download to csv to see more rows up to the %(limit)d limit.": [
-        "Die Anzahl der angezeigten Ergebnisse ist durch die Konfiguration DISPLAY_MAX_ROWS auf %(rows)d begrenzt. Bitte fügen Sie zusätzliche Limits/Filter hinzu oder laden Sie sie als CSDV-Datei herunter, um weitere Zeilen bis zum %(limit)d-Limit anzuzeigen."
+      "The number of results displayed is limited to %(rows)d by the configuration DISPLAY_MAX_ROW. Please add additional limits/filters or download to csv to see more rows up to the %(limit)d limit.": [
+        "Die Anzahl der angezeigten Ergebnisse ist durch die Konfiguration DISPLAY_MAX_ROW auf %(rows)d begrenzt. Bitte fügen Sie zusätzliche Limits/Filter hinzu oder laden Sie sie als CSDV-Datei herunter, um weitere Zeilen bis zum %(limit)d-Limit anzuzeigen."
       ],
       "The number of results displayed is limited to %(rows)d. Please add additional limits/filters, download to csv, or contact an admin to see more rows up to the %(limit)d limit.": [
         "Die Anzahl der angezeigten Ergebnisse ist auf %(rows)d begrenzt. Bitte fügen Sie zusätzliche Limits/Filter hinzu, laden Sie sie als CSV-Datei herunter oder wenden Sie sich an eine*n Administrator*in, um weitere Zeilen bis zum %(limit)d-Limit anzuzeigen."
@@ -5345,13 +5318,7 @@
       "Time Ratio": ["Zeitverhältnis"],
       "Time Series": ["Zeitreihen"],
       "Time Series - Bar Chart": ["Zeitreihen - Balkendiagramm"],
-      "Time Series - Dual Axis Line Chart": [
-        "Zeitreihen - Zweiachsen-Liniendiagramm"
-      ],
       "Time Series - Line Chart": ["Zeitreihen - Liniendiagramm"],
-      "Time Series - Multiple Line Charts": [
-        "Zeitreihen - Diagramme mit mehreren Linien"
-      ],
       "Time Series - Nightingale Rose Chart": [
         "Zeitreihe - Nightingale Rose Chart"
       ],
@@ -5465,7 +5432,6 @@
       "Tree layout": ["Baum-Layout"],
       "Tree orientation": ["Baumausrichtung"],
       "Treemap": ["Treemap"],
-      "Treemap (legacy)": ["Kacheldiagramm (Legacy)"],
       "Trend": ["Trend"],
       "Triangle": ["Dreieck"],
       "Trigger Alert If...": ["Alarm auslösen falls..."],
@@ -5761,14 +5727,8 @@
       "Visualize two different series using the same x-axis. Note that both series can be visualized with a different chart type (e.g. 1 using bars and 1 using a line).": [
         "Visualisieren Sie zwei verschiedene Zeitreihen mit derselben x-Achse. Beachten Sie, dass beide Reihen mit einem anderen Diagrammtyp visualisiert werden können (z. B. eine mit Balken und die andere mit einer Linie)."
       ],
-      "Visualize two different time series using the same x-axis time range. This chart is being deprecated and we recommend using the Mixed Timeseries Chart instead!": [
-        "Visualisieren Sie zwei verschiedene Zeitreihen mit demselben x-Achsen-Zeitbereich. Dieses Diagramm ist überholt und wir empfehlen stattdessen, das Gemischte Zeitreihen-Diagramm zu verwenden!"
-      ],
       "Visualize two different time series using the same x-axis. Note that each time series can be visualized differently (e.g. 1 using bars and 1 using a line).": [
         "Visualisieren Sie zwei verschiedene Zeitreihen mit derselben x-Achse. Beachten Sie, dass jede Zeitreihe unterschiedlich visualisiert werden kann (z. B. eine mit Balken und die andere mit einer Linie)."
-      ],
-      "Visualizes 2 metrics as line plots using the same x-axis. This chart is useful for comparing metrics across the same time range.": [
-        "Visualisiert 2 Metriken als Liniendiagramme mit derselben x-Achse. Dieses Diagramm ist nützlich, um Metriken über den gleichen Zeitraum zu vergleichen."
       ],
       "Visualizes a metric across three dimensions of data in a single chart (X axis, Y axis, and bubble size). Bubbles from the same group can be showcased using bubble color.": [
         "Visualisiert eine Metrik über drei Datendimensionen in einem einzelnen Diagramm (X-Achse, Y-Achse und Blasengröße). Blasen aus derselben Gruppe können mit Blasenfarbe präsentiert werden."
@@ -6085,14 +6045,10 @@
       "Y AXIS TITLE MARGIN": ["Y-ACHSE TITEL RAND"],
       "Y AXIS TITLE POSITION": ["Y-ACHSE TITEL POSITION"],
       "Y Axis": ["Y-Achse"],
-      "Y Axis 1": ["Y-Achse 1"],
-      "Y Axis 2": ["Y-Achse 2"],
       "Y Axis 2 Bounds": ["Grenzen der Y-Achse 2"],
       "Y Axis Bounds": ["Grenzen der Y-Achse"],
       "Y Axis Format": ["Y-Achsenformat"],
       "Y Axis Label": ["Y Achsenbeschriftung"],
-      "Y Axis Left": ["Y-Achse links"],
-      "Y Axis Right": ["Y-Achse rechts"],
       "Y Axis Title": ["Titel der Y-Achse"],
       "Y Log Scale": ["Y-Log-Skala"],
       "Y bounds": ["Y-Grenzen"],

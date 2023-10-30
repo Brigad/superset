@@ -700,12 +700,9 @@
       "Choose File": ["CSV 파일"],
       "Choose a chart or dashboard not both": [""],
       "Choose a dataset": ["데이터소스 선택"],
-      "Choose a metric for left axis": [""],
       "Choose a metric for right axis": [""],
       "Choose a number format": [""],
       "Choose one of the available databases from the panel on the left.": [""],
-      "Choose one or more charts for left axis": [""],
-      "Choose one or more charts for right axis": [""],
       "Choose the annotation layer type": ["주석 레이어"],
       "Choose the format for legend values": [""],
       "Choose the position of the legend": [""],
@@ -1728,7 +1725,6 @@
       ],
       "Least recently modified": [""],
       "Left Axis Format": [""],
-      "Left Axis Metric": [""],
       "Left Axis chart(s)": [""],
       "Left Margin": [""],
       "Left margin, in pixels, allowing for more room for axis labels": [""],
@@ -2186,8 +2182,6 @@
       "Physical dataset": ["데이터소스 선택"],
       "Pick a dimension from which categorical colors are defined": [""],
       "Pick a granularity in the Time section or uncheck 'Include Time'": [""],
-      "Pick a metric for left axis!": [""],
-      "Pick a metric for right axis!": [""],
       "Pick a metric for x, y and size": [""],
       "Pick a metric to display": [""],
       "Pick a metric!": [""],
@@ -2279,7 +2273,6 @@
       ],
       "Predictive": [""],
       "Predictive Analytics": [""],
-      "Prefix metric name with slice name": [""],
       "Preview": ["데이터 미리보기"],
       "Preview: `%s`": [""],
       "Previous": [""],
@@ -2432,7 +2425,6 @@
       "Rich tooltip": [""],
       "Right": [""],
       "Right Axis Format": [""],
-      "Right Axis chart(s)": [""],
       "Right axis metric": [""],
       "Right to Left": [""],
       "Right-click on a dimension value to drill to detail by that value.": [
@@ -2714,9 +2706,6 @@
       "Showing %s of %s": [""],
       "Shows a list of all series available at that point in time": [""],
       "Shows or hides markers for the time series": [""],
-      "Shows the composition of a dataset by segmenting a given rectangle as smaller rectangles with areas proportional to their value or contribution to the whole. Those rectangles may also, in turn, be further segmented hierarchically.": [
-        ""
-      ],
       "Significance Level": [""],
       "Simple": [""],
       "Simple ad-hoc metrics are not enabled for this dataset": [""],
@@ -2887,7 +2876,6 @@
       "Take your data points, and group them into \"bins\" to see where the densest areas of information lie": [
         ""
       ],
-      "Target aspect ratio for treemap tiles.": [""],
       "Template Name": ["템플릿 명"],
       "Template parameters": [""],
       "Templated link, it's possible to include {{ metric }} or other values coming from the controls.": [
@@ -3011,7 +2999,7 @@
       "The number of hours, negative or positive, to shift the time column. This can be used to move UTC time to local time.": [
         ""
       ],
-      "The number of results displayed is limited to %(rows)d by the configuration DISPLAY_MAX_ROWS. Please add additional limits/filters or download to csv to see more rows up to the %(limit)d limit.": [
+      "The number of results displayed is limited to %(rows)d by the configuration DISPLAY_MAX_ROW. Please add additional limits/filters or download to csv to see more rows up to the %(limit)d limit.": [
         ""
       ],
       "The number of results displayed is limited to %(rows)d. Please add additional limits/filters, download to csv, or contact an admin to see more rows up to the %(limit)d limit.": [
@@ -3304,9 +3292,7 @@
       "Time Lag": [""],
       "Time Range": [""],
       "Time Series - Bar Chart": [""],
-      "Time Series - Dual Axis Line Chart": [""],
       "Time Series - Line Chart": [""],
-      "Time Series - Multiple Line Charts": [""],
       "Time Series - Nightingale Rose Chart": [""],
       "Time Series - Paired t-test": [""],
       "Time Series - Percent Change": [""],
@@ -3371,6 +3357,7 @@
       "Tooltip time format": [""],
       "Top right": [""],
       "Top to Bottom": [""],
+      "Total": [""],
       "Total (%(aggfunc)s)": [""],
       "Total (%(aggregatorName)s)": [""],
       "Total: %s": [""],
@@ -3381,7 +3368,6 @@
       "Transpose pivot": [""],
       "Tree layout": [""],
       "Treemap": ["트리맵"],
-      "Treemap (legacy)": [""],
       "Trend": [""],
       "Triangle": [""],
       "Trigger Alert If...": [""],
@@ -3569,13 +3555,7 @@
       "Visualize two different series using the same x-axis. Note that both series can be visualized with a different chart type (e.g. 1 using bars and 1 using a line).": [
         ""
       ],
-      "Visualize two different time series using the same x-axis time range. This chart is being deprecated and we recommend using the Mixed Timeseries Chart instead!": [
-        ""
-      ],
       "Visualize two different time series using the same x-axis. Note that each time series can be visualized differently (e.g. 1 using bars and 1 using a line).": [
-        ""
-      ],
-      "Visualizes 2 metrics as line plots using the same x-axis. This chart is useful for comparing metrics across the same time range.": [
         ""
       ],
       "Visualizes a metric across three dimensions of data in a single chart (X axis, Y axis, and bubble size). Bubbles from the same group can be showcased using bubble color.": [
@@ -3782,14 +3762,10 @@
       "Y AXIS TITLE MARGIN": [""],
       "Y AXIS TITLE POSITION": [""],
       "Y Axis": [""],
-      "Y Axis 1": [""],
-      "Y Axis 2": [""],
       "Y Axis 2 Bounds": [""],
       "Y Axis Bounds": [""],
       "Y Axis Format": [""],
       "Y Axis Label": [""],
-      "Y Axis Left": [""],
-      "Y Axis Right": [""],
       "Y Axis Title": [""],
       "Y Log Scale": [""],
       "Y bounds": [""],

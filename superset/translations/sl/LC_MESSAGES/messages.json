@@ -988,7 +988,6 @@
       ],
       "Choose a database...": ["Izberite podatkovno bazo..."],
       "Choose a dataset": ["Izberite podatkovni set"],
-      "Choose a metric for left axis": ["Izberite mero za levo os"],
       "Choose a metric for right axis": ["Izberite mero za desno os"],
       "Choose a number format": ["Izberite obliko zapisa števila"],
       "Choose a source": ["Izberite izvor"],
@@ -997,12 +996,6 @@
       "Choose chart type": ["Izberite tip grafikona"],
       "Choose one of the available databases from the panel on the left.": [
         "Izberite eno od razpoložljivih podatkovnih baz v panelu na levi."
-      ],
-      "Choose one or more charts for left axis": [
-        "Izberite enega ali več grafikonov za levo os"
-      ],
-      "Choose one or more charts for right axis": [
-        "Izberite enega ali več grafikonov za desno os"
       ],
       "Choose the annotation layer type": ["Izberite tip sloja z oznakami"],
       "Choose the format for legend values": [
@@ -2396,7 +2389,6 @@
       "Least recently modified": ["Zadnje spremenjeno"],
       "Left": ["Levo"],
       "Left Axis Format": ["Oblika leve osi"],
-      "Left Axis Metric": ["Mera za levo os"],
       "Left Axis chart(s)": ["Grafikoni leve osi"],
       "Left Margin": ["Levi rob"],
       "Left margin, in pixels, allowing for more room for axis labels": [
@@ -2622,7 +2614,6 @@
       "Multi-Levels": ["Večplastni"],
       "Multi-Variables": ["Več spremenljivk"],
       "Multiple": ["Več"],
-      "Multiple Line Charts": ["Veččrtni grafikon"],
       "Multiple file extensions are not allowed for columnar uploads. Please make sure all files are of the same extension.": [
         "Za nalaganje stolpčnih datotek niso dovoljene različne končnice. Poskrbite, da imajo vse datoteke enake končnice."
       ],
@@ -2984,8 +2975,6 @@
       "Pick a granularity in the Time section or uncheck 'Include Time'": [
         "Izberite granulacijo v razdelku 'Čas' ali odstranite 'Vključi čas'"
       ],
-      "Pick a metric for left axis!": ["Izberite mero za levo os!"],
-      "Pick a metric for right axis!": ["Izberite mero za desno os!"],
       "Pick a metric for x, y and size": ["Izberite mere za x, y in velikost"],
       "Pick a metric to display": ["Izberite mero za prikaz"],
       "Pick a metric!": ["Izberite mero!"],
@@ -3112,7 +3101,6 @@
       ],
       "Predictive": ["Prediktivno"],
       "Predictive Analytics": ["Prediktivna analitika"],
-      "Prefix metric name with slice name": ["Imenu mere pripni ime rezine"],
       "Preview": ["Predogled"],
       "Preview: `%s`": ["Predogled: `%s`"],
       "Previous": ["Prejšnji"],
@@ -3329,7 +3317,6 @@
       "Right": ["Desno"],
       "Right Axis Format": ["Oblika desne osi"],
       "Right Axis Metric": ["Mera desne osi"],
-      "Right Axis chart(s)": ["Grafikoni desne osi"],
       "Right axis metric": ["Mera desne osi"],
       "Right to Left": ["Iz desne proti levi"],
       "Right value": ["Desna vrednost"],
@@ -3688,9 +3675,6 @@
         "Prikaže seznam vseh razpoložljivih podatkovnih serij za istočasno točko"
       ],
       "Shows or hides markers for the time series": [""],
-      "Shows the composition of a dataset by segmenting a given rectangle as smaller rectangles with areas proportional to their value or contribution to the whole. Those rectangles may also, in turn, be further segmented hierarchically.": [
-        ""
-      ],
       "Significance Level": ["Stopnja značilnosti"],
       "Simple": ["Preprosto"],
       "Simple ad-hoc metrics are not enabled for this dataset": [
@@ -3911,9 +3895,6 @@
       ],
       "Target": ["Cilj"],
       "Target Color": ["Ciljna barva"],
-      "Target aspect ratio for treemap tiles.": [
-        "Ciljno razmerje za razdelke drevesnega grafikona."
-      ],
       "Target category": ["Kategorija cilja"],
       "Target value": ["Ciljna vrednost"],
       "Template Name": ["Ime predloge"],
@@ -4078,8 +4059,8 @@
       "The number of hours, negative or positive, to shift the time column. This can be used to move UTC time to local time.": [
         "Število ur, negativno ali pozitivno, za zamik časovnega stolpca. Na ta način je mogoče UTC čas prestaviti na lokalni čas."
       ],
-      "The number of results displayed is limited to %(rows)d by the configuration DISPLAY_MAX_ROWS. Please add additional limits/filters or download to csv to see more rows up to the %(limit)d limit.": [
-        "Število prikazanih rezultatov je omejeno na %(rows)d na podlagi parametra DISPLAY_MAX_ROWS. V csv dodajte dodatne omejitve/filtre, da boste lahko videli več vrstic do meje %(limit)d ."
+      "The number of results displayed is limited to %(rows)d by the configuration DISPLAY_MAX_ROW. Please add additional limits/filters or download to csv to see more rows up to the %(limit)d limit.": [
+        "Število prikazanih rezultatov je omejeno na %(rows)d na podlagi parametra DISPLAY_MAX_ROW. V csv dodajte dodatne omejitve/filtre, da boste lahko videli več vrstic do meje %(limit)d ."
       ],
       "The number of results displayed is limited to %(rows)d. Please add additional limits/filters, download to csv, or contact an admin to see more rows up to the %(limit)d limit.": [
         "Število prikazanih rezultatov je omejeno na %(rows)d . V csv dodajte dodatne omejitve/filtre, da boste lahko videli več vrstic do meje %(limit)d ."
@@ -4497,13 +4478,7 @@
       "Time Range": ["Časovno obdobje"],
       "Time Series": ["Časovna vrsta"],
       "Time Series - Bar Chart": ["Časovna vrsta - Stolpčni grafikon"],
-      "Time Series - Dual Axis Line Chart": [
-        "Časovna vrsta - Črtni grafikon z dvojno osjo"
-      ],
       "Time Series - Line Chart": ["Časovna vrsta - Črtni grafikon"],
-      "Time Series - Multiple Line Charts": [
-        "Časovna vrsta - Veččrtni grafikon"
-      ],
       "Time Series - Nightingale Rose Chart": [
         "Časovna vrsta - Nightingale Rose grafikon"
       ],
@@ -4610,7 +4585,6 @@
       "Tree layout": ["Oblika drevesa"],
       "Tree orientation": ["Orientacija drevesa"],
       "Treemap": ["Drevesni grafikon s pravokotniki"],
-      "Treemap (legacy)": [""],
       "Trend": ["Trend"],
       "Triangle": ["Trikotnik"],
       "Trigger Alert If...": ["Sproži opozorilo v primeru ..."],
@@ -4878,14 +4852,8 @@
       "Visualize two different series using the same x-axis. Note that both series can be visualized with a different chart type (e.g. 1 using bars and 1 using a line).": [
         "Prikaže dva različna niza na isti x-osi. Niza sta lahko prikazana z različnim tipom grafikona (npr. en s stolpci in drug s črto)."
       ],
-      "Visualize two different time series using the same x-axis time range. This chart is being deprecated and we recommend using the Mixed Timeseries Chart instead!": [
-        "Prikaže dve različni časovni vrsti z isto x-osjo oz. časovnim obdobjem. Grafikon se opušča, zato priporočamo uporabo kombiniranega grafikona časovne vrste!"
-      ],
       "Visualize two different time series using the same x-axis. Note that each time series can be visualized differently (e.g. 1 using bars and 1 using a line).": [
         "Prikaže dve različni časovni vrsti na isti x-osi. Časovni vrsti sta lahko prikazani različno (npr. ena s stolpci in druga s črto)."
-      ],
-      "Visualizes 2 metrics as line plots using the same x-axis. This chart is useful for comparing metrics across the same time range.": [
-        "Prikaže dve meri na črtnem grafu z isto x-osjo. Grafikon je uporaben za primerjavo mer v istem časovnem obdobju."
       ],
       "Visualizes a metric across three dimensions of data in a single chart (X axis, Y axis, and bubble size). Bubbles from the same group can be showcased using bubble color.": [
         "Prikaže mero v treh dimenzijah podatkov na istem grafikonu (x os, y os, velikost mehurčka). Mehurčki v isti skupini so predstavljeni z barvo."
@@ -5151,14 +5119,10 @@
       "Y AXIS TITLE MARGIN": ["OBROBA NASLOVA Y OSI"],
       "Y AXIS TITLE POSITION": ["POZICIJA NASLOVA Y OSI"],
       "Y Axis": ["Y os"],
-      "Y Axis 1": ["Y-os 1"],
-      "Y Axis 2": ["Y-os 2"],
       "Y Axis 2 Bounds": ["Meje Y 2-osi"],
       "Y Axis Bounds": ["Meje Y-osi"],
       "Y Axis Format": ["Oblika Y osi"],
       "Y Axis Label": ["Naslov Y osi"],
-      "Y Axis Left": ["Y-os levo"],
-      "Y Axis Right": ["Y-os desno"],
       "Y Axis Title": ["Naslov Y osi"],
       "Y Log Scale": ["Logaritemska Y-os"],
       "Y bounds": ["Y meje"],

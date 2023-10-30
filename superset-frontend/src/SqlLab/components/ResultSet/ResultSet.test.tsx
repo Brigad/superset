@@ -95,7 +95,7 @@ const asyncRefetchResultsTableProps = {
     resultsKey: 'async results key',
   },
 };
-fetchMock.get('glob:*/api/v1/dataset?*', { result: [] });
+fetchMock.get('glob:*/api/v1/dataset/?*', { result: [] });
 
 const middlewares = [thunk];
 const mockStore = configureStore(middlewares);
@@ -122,10 +122,10 @@ describe('ResultSet', () => {
     expect(table).toBeInTheDocument();
 
     const firstColumn = queryAllByText(
-      mockedProps.query.results?.columns[0].name ?? '',
+      mockedProps.query.results?.columns[0].column_name ?? '',
     )[0];
     const secondColumn = queryAllByText(
-      mockedProps.query.results?.columns[1].name ?? '',
+      mockedProps.query.results?.columns[1].column_name ?? '',
     )[0];
     expect(firstColumn).toBeInTheDocument();
     expect(secondColumn).toBeInTheDocument();

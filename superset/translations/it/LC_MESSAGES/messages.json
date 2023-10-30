@@ -1683,7 +1683,6 @@
         ""
       ],
       "Left Axis Format": [""],
-      "Left Axis chart(s)": [""],
       "Left Margin": [""],
       "Left margin, in pixels, allowing for more room for axis labels": [""],
       "Left to Right": [""],
@@ -2105,12 +2104,6 @@
       "Pick a granularity in the Time section or uncheck 'Include Time'": [
         "Seleziona una granularità nella sezione tempo e deseleziona 'Includi Tempo'"
       ],
-      "Pick a metric for left axis!": [
-        "Seleziona una metrica per l'asse sinistro"
-      ],
-      "Pick a metric for right axis!": [
-        "Seleziona una metrica per l'asse destro"
-      ],
       "Pick a metric for x, y and size": [
         "Seleziona una metrica per x, y e grandezza"
       ],
@@ -2209,7 +2202,6 @@
       "Predicate applied when fetching distinct value to populate the filter control component. Supports jinja template syntax. Applies only when `Enable Filter Select` is on.": [
         "Predicato utilizzato quando si fornisce un valore univoco per popolare il componente di controllo del filtro. Supporta la sintassi del template jinja. È utilizzabile solo quando è abilitata l'opzione \"Abilita selezione filtro\"."
       ],
-      "Prefix metric name with slice name": [""],
       "Preview": [""],
       "Preview: `%s`": [""],
       "Previous": [""],
@@ -2644,9 +2636,6 @@
       "Showing %s of %s": [""],
       "Shows a list of all series available at that point in time": [""],
       "Shows or hides markers for the time series": [""],
-      "Shows the composition of a dataset by segmenting a given rectangle as smaller rectangles with areas proportional to their value or contribution to the whole. Those rectangles may also, in turn, be further segmented hierarchically.": [
-        ""
-      ],
       "Significance Level": [""],
       "Simple": [""],
       "Simple ad-hoc metrics are not enabled for this dataset": [""],
@@ -2814,7 +2803,6 @@
         ""
       ],
       "Target Color": [""],
-      "Target aspect ratio for treemap tiles.": [""],
       "Target category": [""],
       "Target value": [""],
       "Template Name": [""],
@@ -2937,7 +2925,7 @@
       "The number of hours, negative or positive, to shift the time column. This can be used to move UTC time to local time.": [
         ""
       ],
-      "The number of results displayed is limited to %(rows)d by the configuration DISPLAY_MAX_ROWS. Please add additional limits/filters or download to csv to see more rows up to the %(limit)d limit.": [
+      "The number of results displayed is limited to %(rows)d by the configuration DISPLAY_MAX_ROW. Please add additional limits/filters or download to csv to see more rows up to the %(limit)d limit.": [
         ""
       ],
       "The number of results displayed is limited to %(rows)d. Please add additional limits/filters, download to csv, or contact an admin to see more rows up to the %(limit)d limit.": [
@@ -3234,13 +3222,7 @@
       "Time Lag": [""],
       "Time Range": [""],
       "Time Series - Bar Chart": ["Serie Temporali - Grafico Barre"],
-      "Time Series - Dual Axis Line Chart": [
-        "Serie Temporali - Grafico Lineare ad Assi Duali"
-      ],
       "Time Series - Line Chart": ["Serie Temporali - Grafico Lineare"],
-      "Time Series - Multiple Line Charts": [
-        "Serie Temporali - Grafico Lineare"
-      ],
       "Time Series - Nightingale Rose Chart": [""],
       "Time Series - Paired t-test": [""],
       "Time Series - Percent Change": [
@@ -3308,6 +3290,7 @@
       "Tooltip": [""],
       "Top": [""],
       "Top to Bottom": [""],
+      "Total": [""],
       "Total (%(aggfunc)s)": [""],
       "Total (%(aggregatorName)s)": [""],
       "Total: %s": [""],
@@ -3318,7 +3301,6 @@
       "Transpose pivot": [""],
       "Tree layout": [""],
       "Treemap": ["Treemap"],
-      "Treemap (legacy)": [""],
       "Trend": [""],
       "Triangle": [""],
       "Trigger Alert If...": [""],
@@ -3507,13 +3489,7 @@
       "Visualize two different series using the same x-axis. Note that both series can be visualized with a different chart type (e.g. 1 using bars and 1 using a line).": [
         ""
       ],
-      "Visualize two different time series using the same x-axis time range. This chart is being deprecated and we recommend using the Mixed Timeseries Chart instead!": [
-        ""
-      ],
       "Visualize two different time series using the same x-axis. Note that each time series can be visualized differently (e.g. 1 using bars and 1 using a line).": [
-        ""
-      ],
-      "Visualizes 2 metrics as line plots using the same x-axis. This chart is useful for comparing metrics across the same time range.": [
         ""
       ],
       "Visualizes a metric across three dimensions of data in a single chart (X axis, Y axis, and bubble size). Bubbles from the same group can be showcased using bubble color.": [
@@ -3717,14 +3693,10 @@
       "Y AXIS TITLE MARGIN": [""],
       "Y AXIS TITLE POSITION": [""],
       "Y Axis": [""],
-      "Y Axis 1": [""],
-      "Y Axis 2": [""],
       "Y Axis 2 Bounds": [""],
       "Y Axis Bounds": [""],
       "Y Axis Format": [""],
       "Y Axis Label": [""],
-      "Y Axis Left": [""],
-      "Y Axis Right": [""],
       "Y Axis Title": [""],
       "Y Log Scale": [""],
       "Y bounds": [""],

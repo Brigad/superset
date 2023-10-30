@@ -201,7 +201,7 @@
         ""
       ],
       "A timeout occurred while executing the query.": [""],
-      "A timeout occurred while generating a csv.": [""],
+      "A timeout occurred while generating a CSV.": [""],
       "A timeout occurred while generating a dataframe.": [""],
       "A timeout occurred while taking a screenshot.": [""],
       "A valid color scheme is required": [""],
@@ -346,7 +346,7 @@
       "Allow CREATE TABLE AS option in SQL Lab": [""],
       "Allow CREATE VIEW AS": [""],
       "Allow CREATE VIEW AS option in SQL Lab": [""],
-      "Allow Csv Upload": [""],
+      "Allow CSV Upload": [""],
       "Allow DML": [""],
       "Allow columns to be rearranged": [""],
       "Allow creation of new tables based on queries": [""],
@@ -808,7 +808,6 @@
       "Choose a chart or dashboard not both": [""],
       "Choose a database...": [""],
       "Choose a dataset": [""],
-      "Choose a metric for left axis": [""],
       "Choose a metric for right axis": [""],
       "Choose a number format": [""],
       "Choose a source": [""],
@@ -816,8 +815,6 @@
       "Choose a target": [""],
       "Choose chart type": [""],
       "Choose one of the available databases from the panel on the left.": [""],
-      "Choose one or more charts for left axis": [""],
-      "Choose one or more charts for right axis": [""],
       "Choose the annotation layer type": [""],
       "Choose the format for legend values": [""],
       "Choose the position of the legend": [""],
@@ -1142,7 +1139,7 @@
       "Database \"%(database_name)s\" schema \"%(schema_name)s\" is not allowed for columnar uploads. Please contact your Superset Admin.": [
         ""
       ],
-      "Database \"%(database_name)s\" schema \"%(schema_name)s\" is not allowed for csv uploads. Please contact your Superset Admin.": [
+      "Database \"%(database_name)s\" schema \"%(schema_name)s\" is not allowed for CSV uploads. Please contact your Superset Admin.": [
         ""
       ],
       "Database \"%(database_name)s\" schema \"%(schema_name)s\" is not allowed for excel uploads. Please contact your Superset Admin.": [
@@ -1828,7 +1825,7 @@
       "If duplicate columns are not overridden, they will be presented as \"X.1, X.2 ...X.x\"": [
         ""
       ],
-      "If selected, please set the schemas allowed for csv upload in Extra.": [
+      "If selected, please set the schemas allowed for CSV upload in Extra.": [
         ""
       ],
       "If table exists do one of the following: Fail (do nothing), Replace (drop and recreate table) or Append (insert data).": [
@@ -2007,7 +2004,6 @@
       "Least recently modified": [""],
       "Left": [""],
       "Left Axis Format": [""],
-      "Left Axis Metric": [""],
       "Left Axis chart(s)": [""],
       "Left Margin": [""],
       "Left margin, in pixels, allowing for more room for axis labels": [""],
@@ -2217,7 +2213,6 @@
       "Multi-Levels": [""],
       "Multi-Variables": [""],
       "Multiple": [""],
-      "Multiple Line Charts": [""],
       "Multiple file extensions are not allowed for columnar uploads. Please make sure all files are of the same extension.": [
         ""
       ],
@@ -2403,7 +2398,7 @@
       "One or more parameters needed to configure a database are missing.": [
         ""
       ],
-      "One or more parameters specified in the query are malformatted.": [""],
+      "One or more parameters specified in the query are malformed.": [""],
       "One or more parameters specified in the query are missing.": [""],
       "One or more required fields are missing in the request. Please try again, and if the problem persists contact your administrator.": [
         ""
@@ -2528,8 +2523,6 @@
       "Physical dataset": [""],
       "Pick a dimension from which categorical colors are defined": [""],
       "Pick a granularity in the Time section or uncheck 'Include Time'": [""],
-      "Pick a metric for left axis!": [""],
-      "Pick a metric for right axis!": [""],
       "Pick a metric for x, y and size": [""],
       "Pick a metric to display": [""],
       "Pick a metric!": [""],
@@ -2629,7 +2622,6 @@
       ],
       "Predictive": [""],
       "Predictive Analytics": [""],
-      "Prefix metric name with slice name": [""],
       "Preview": [""],
       "Preview: `%s`": [""],
       "Previous": [""],
@@ -2766,7 +2758,7 @@
       "Report Schedule could not be deleted.": [""],
       "Report Schedule could not be updated.": [""],
       "Report Schedule delete failed.": [""],
-      "Report Schedule execution failed when generating a csv.": [""],
+      "Report Schedule execution failed when generating a CSV.": [""],
       "Report Schedule execution failed when generating a dataframe.": [""],
       "Report Schedule execution failed when generating a screenshot.": [""],
       "Report Schedule execution got an unexpected error.": [""],
@@ -2818,7 +2810,6 @@
       "Right": [""],
       "Right Axis Format": [""],
       "Right Axis Metric": [""],
-      "Right Axis chart(s)": [""],
       "Right axis metric": [""],
       "Right to Left": [""],
       "Right value": [""],
@@ -3176,9 +3167,6 @@
       "Showing %s of %s": [""],
       "Shows a list of all series available at that point in time": [""],
       "Shows or hides markers for the time series": [""],
-      "Shows the composition of a dataset by segmenting a given rectangle as smaller rectangles with areas proportional to their value or contribution to the whole. Those rectangles may also, in turn, be further segmented hierarchically.": [
-        ""
-      ],
       "Significance Level": [""],
       "Simple": [""],
       "Simple ad-hoc metrics are not enabled for this dataset": [""],
@@ -3392,7 +3380,6 @@
       ],
       "Target": [""],
       "Target Color": [""],
-      "Target aspect ratio for treemap tiles.": [""],
       "Target category": [""],
       "Target value": [""],
       "Template Name": [""],
@@ -3526,10 +3513,10 @@
       "The number of hours, negative or positive, to shift the time column. This can be used to move UTC time to local time.": [
         ""
       ],
-      "The number of results displayed is limited to %(rows)d by the configuration DISPLAY_MAX_ROWS. Please add additional limits/filters or download to csv to see more rows up to the %(limit)d limit.": [
+      "The number of results displayed is limited to %(rows)d by the configuration DISPLAY_MAX_ROW. Please add additional limits/filters or download to CSV to see more rows up to the %(limit)d limit.": [
         ""
       ],
-      "The number of results displayed is limited to %(rows)d. Please add additional limits/filters, download to csv, or contact an admin to see more rows up to the %(limit)d limit.": [
+      "The number of results displayed is limited to %(rows)d. Please add additional limits/filters, download to CSV, or contact an admin to see more rows up to the %(limit)d limit.": [
         ""
       ],
       "The number of rows displayed is limited to %(rows)d by the dropdown.": [
@@ -3837,9 +3824,7 @@
       "Time Ratio": [""],
       "Time Series": [""],
       "Time Series - Bar Chart": [""],
-      "Time Series - Dual Axis Line Chart": [""],
       "Time Series - Line Chart": [""],
-      "Time Series - Multiple Line Charts": [""],
       "Time Series - Nightingale Rose Chart": [""],
       "Time Series - Paired t-test": [""],
       "Time Series - Percent Change": [""],
@@ -3926,6 +3911,7 @@
       "Top left": [""],
       "Top right": [""],
       "Top to Bottom": [""],
+      "Total": [""],
       "Total (%(aggfunc)s)": [""],
       "Total (%(aggregatorName)s)": [""],
       "Total value": [""],
@@ -3939,7 +3925,6 @@
       "Tree layout": [""],
       "Tree orientation": [""],
       "Treemap": [""],
-      "Treemap (legacy)": [""],
       "Trend": [""],
       "Triangle": [""],
       "Trigger Alert If...": [""],
@@ -4023,6 +4008,7 @@
       "Unknown column used in orderby: %(col)s": [""],
       "Unknown error": [""],
       "Unknown input format": [""],
+      "Unknown type": [""],
       "Unknown value": [""],
       "Unsafe return type for function %(func)s: %(value_type)s": [""],
       "Unsafe template value for key %(key)s: %(value_type)s": [""],
@@ -4151,13 +4137,7 @@
       "Visualize two different series using the same x-axis. Note that both series can be visualized with a different chart type (e.g. 1 using bars and 1 using a line).": [
         ""
       ],
-      "Visualize two different time series using the same x-axis time range. This chart is being deprecated and we recommend using the Mixed Timeseries Chart instead!": [
-        ""
-      ],
       "Visualize two different time series using the same x-axis. Note that each time series can be visualized differently (e.g. 1 using bars and 1 using a line).": [
-        ""
-      ],
-      "Visualizes 2 metrics as line plots using the same x-axis. This chart is useful for comparing metrics across the same time range.": [
         ""
       ],
       "Visualizes a metric across three dimensions of data in a single chart (X axis, Y axis, and bubble size). Bubbles from the same group can be showcased using bubble color.": [
@@ -4367,14 +4347,10 @@
       "Y AXIS TITLE MARGIN": [""],
       "Y AXIS TITLE POSITION": [""],
       "Y Axis": [""],
-      "Y Axis 1": [""],
-      "Y Axis 2": [""],
       "Y Axis 2 Bounds": [""],
       "Y Axis Bounds": [""],
       "Y Axis Format": [""],
       "Y Axis Label": [""],
-      "Y Axis Left": [""],
-      "Y Axis Right": [""],
       "Y Axis Title": [""],
       "Y Log Scale": [""],
       "Y bounds": [""],
@@ -4448,7 +4424,7 @@
       "You don't have the rights to alter this title.": [""],
       "You don't have the rights to create a chart": [""],
       "You don't have the rights to create a dashboard": [""],
-      "You don't have the rights to download as csv": [""],
+      "You don't have the rights to download as CSV": [""],
       "You have no permission to approve this request": [""],
       "You have removed this filter.": [""],
       "You have unsaved changes.": [""],

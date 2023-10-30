@@ -25,6 +25,22 @@ networks:
   superset-default:
     name: superset_default
 services:
+  redis:
+    image: redis:7
+    container_name: superset_cache
+    restart: unless-stopped
+    volumes:
+      - redis:/data
+
+  db:
+    env_file: docker/.env-non-dev
+    image: postgres:15
+    container_name: superset_db
+    restart: unless-stopped
+    volumes:
+      - db_home:/var/lib/postgresql/data
+      - ./docker/docker-entrypoint-initdb.d:/docker-entrypoint-initdb.d
+
   superset:
     env_file: docker/.env-non-dev
     image: *superset-image
@@ -89,31 +105,12 @@ services:
     depends_on:
       - redis
     healthcheck:
-      test: celery -A superset.tasks.celery_app:app inspect -d celery@$$HOSTNAME ping
-      interval: 15s
-      timeout: 20s
-      start_period: 10s
-      retries: 3
-  
-  superset-worker-3:
-    image: *superset-image
-    container_name: superset_worker_3
-    command: ["/app/docker/docker-bootstrap.sh", "worker"]
-    env_file: docker/.env-non-dev
-    restart: unless-stopped
-    user: "root"
-    volumes: *superset-volumes
-    networks:
-      superset-default: null
-    depends_on:
-      - redis
-    healthcheck:
-      test: celery -A superset.tasks.celery_app:app inspect -d celery@$$HOSTNAME ping
-      interval: 15s
-      timeout: 20s
-      start_period: 10s
-      retries: 3
-  
+      test:
+        [
+          "CMD-SHELL",
+          "celery -A superset.tasks.celery_app:app inspect ping -d celery@$$HOSTNAME",
+        ]
+
   superset-worker-beat:
     image: *superset-image
     container_name: superset_worker_beat

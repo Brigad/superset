@@ -1733,7 +1733,6 @@
       ],
       "Least recently modified": ["最終更新"],
       "Left Axis Format": [""],
-      "Left Axis chart(s)": [""],
       "Left Margin": [""],
       "Left margin, in pixels, allowing for more room for axis labels": [""],
       "Left to Right": [""],
@@ -2156,8 +2155,6 @@
       "Physical dataset": [""],
       "Pick a dimension from which categorical colors are defined": [""],
       "Pick a granularity in the Time section or uncheck 'Include Time'": [""],
-      "Pick a metric for left axis!": [""],
-      "Pick a metric for right axis!": [""],
       "Pick a metric for x, y and size": [""],
       "Pick a metric to display": ["表示する指標を選択"],
       "Pick a metric!": ["指標を選んでください!"],
@@ -2250,7 +2247,6 @@
         ""
       ],
       "Predictive Analytics": [""],
-      "Prefix metric name with slice name": [""],
       "Preview": ["プレビュー"],
       "Preview: `%s`": [""],
       "Previous": ["前"],
@@ -2701,9 +2697,6 @@
       "Showing %s of %s": ["Showing %s of %s"],
       "Shows a list of all series available at that point in time": [""],
       "Shows or hides markers for the time series": [""],
-      "Shows the composition of a dataset by segmenting a given rectangle as smaller rectangles with areas proportional to their value or contribution to the whole. Those rectangles may also, in turn, be further segmented hierarchically.": [
-        ""
-      ],
       "Significance Level": [""],
       "Simple": [""],
       "Simple ad-hoc metrics are not enabled for this dataset": [""],
@@ -2867,7 +2860,6 @@
       "Take your data points, and group them into \"bins\" to see where the densest areas of information lie": [
         ""
       ],
-      "Target aspect ratio for treemap tiles.": [""],
       "Target category": [""],
       "Target value": [""],
       "Template Name": ["テンプレート名"],
@@ -2987,7 +2979,7 @@
       "The number of hours, negative or positive, to shift the time column. This can be used to move UTC time to local time.": [
         ""
       ],
-      "The number of results displayed is limited to %(rows)d by the configuration DISPLAY_MAX_ROWS. Please add additional limits/filters or download to csv to see more rows up to the %(limit)d limit.": [
+      "The number of results displayed is limited to %(rows)d by the configuration DISPLAY_MAX_ROW. Please add additional limits/filters or download to csv to see more rows up to the %(limit)d limit.": [
         ""
       ],
       "The number of results displayed is limited to %(rows)d. Please add additional limits/filters, download to csv, or contact an admin to see more rows up to the %(limit)d limit.": [
@@ -3300,9 +3292,7 @@
       "Time Comparison": [""],
       "Time Granularity": [""],
       "Time Series - Bar Chart": ["時系列 - 棒グラフ"],
-      "Time Series - Dual Axis Line Chart": ["時系列 - 二重軸折れ線グラフ"],
       "Time Series - Line Chart": ["時系列 - 折れ線グラフ"],
-      "Time Series - Multiple Line Charts": ["時系列 - 複数の折れ線グラフ"],
       "Time Series - Nightingale Rose Chart": [""],
       "Time Series - Paired t-test": [""],
       "Time Series - Percent Change": ["時系列 - 変化率"],
@@ -3364,6 +3354,7 @@
       "Tools": [""],
       "Tooltip": [""],
       "Top to Bottom": [""],
+      "Total": [""],
       "Total (%(aggfunc)s)": [""],
       "Total (%(aggregatorName)s)": [""],
       "Total: %s": [""],
@@ -3374,7 +3365,6 @@
       "Transpose pivot": [""],
       "Tree layout": [""],
       "Treemap": ["ツリーマップ"],
-      "Treemap (legacy)": [""],
       "Triangle": [""],
       "Trigger Alert If...": [""],
       "Truncate Axis": [""],
@@ -3559,13 +3549,7 @@
       "Visualize two different series using the same x-axis. Note that both series can be visualized with a different chart type (e.g. 1 using bars and 1 using a line).": [
         ""
       ],
-      "Visualize two different time series using the same x-axis time range. This chart is being deprecated and we recommend using the Mixed Timeseries Chart instead!": [
-        ""
-      ],
       "Visualize two different time series using the same x-axis. Note that each time series can be visualized differently (e.g. 1 using bars and 1 using a line).": [
-        ""
-      ],
-      "Visualizes 2 metrics as line plots using the same x-axis. This chart is useful for comparing metrics across the same time range.": [
         ""
       ],
       "Visualizes a metric across three dimensions of data in a single chart (X axis, Y axis, and bubble size). Bubbles from the same group can be showcased using bubble color.": [
@@ -3766,14 +3750,10 @@
       "Y AXIS TITLE MARGIN": [""],
       "Y AXIS TITLE POSITION": [""],
       "Y Axis": ["Y軸"],
-      "Y Axis 1": [""],
-      "Y Axis 2": [""],
       "Y Axis 2 Bounds": [""],
       "Y Axis Bounds": [""],
       "Y Axis Format": [""],
       "Y Axis Label": [""],
-      "Y Axis Left": [""],
-      "Y Axis Right": [""],
       "Y Axis Title": [""],
       "Y Log Scale": [""],
       "Y bounds": [""],

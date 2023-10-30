@@ -20,11 +20,12 @@ import enum
 from typing import TYPE_CHECKING
 
 from flask_appbuilder import Model
-from sqlalchemy import Column, Enum, ForeignKey, Integer, String
+from sqlalchemy import Column, Enum, ForeignKey, Integer, String, Table, Text
 from sqlalchemy.engine.base import Connection
 from sqlalchemy.orm import relationship, Session, sessionmaker
 from sqlalchemy.orm.mapper import Mapper
 
+from superset import security_manager
 from superset.models.helpers import AuditMixinNullable
 
 if TYPE_CHECKING:
@@ -35,6 +36,13 @@ if TYPE_CHECKING:
     from superset.models.sql_lab import Query
 
 Session = sessionmaker(autoflush=False)
+
+user_favorite_tag_table = Table(
+    "user_favorite_tag",
+    Model.metadata,  # pylint: disable=no-member
+    Column("user_id", Integer, ForeignKey("ab_user.id")),
+    Column("tag_id", Integer, ForeignKey("tag.id")),
+)
 
 
 class TagTypes(enum.Enum):
@@ -76,6 +84,15 @@ class Tag(Model, AuditMixinNullable):
     id = Column(Integer, primary_key=True)
     name = Column(String(250), unique=True)
     type = Column(Enum(TagTypes))
+    description = Column(Text)
+
+    objects = relationship(
+        "TaggedObject", back_populates="tag", overlaps="objects,tags"
+    )
+
+    users_favorited = relationship(
+        security_manager.user_model, secondary=user_favorite_tag_table
+    )
 
 
 class TaggedObject(Model, AuditMixinNullable):
@@ -93,7 +110,7 @@ class TaggedObject(Model, AuditMixinNullable):
     )
     object_type = Column(Enum(ObjectTypes))
 
-    tag = relationship("Tag", backref="objects")
+    tag = relationship("Tag", back_populates="objects", overlaps="tags")
 
 
 def get_tag(name: str, session: Session, type_: TagTypes) -> Tag:
@@ -116,7 +133,9 @@ def get_object_type(class_name: str) -> ObjectTypes:
     try:
         return mapping[class_name.lower()]
     except KeyError as ex:
-        raise Exception(f"No mapping found for {class_name}") from ex
+        raise Exception(  # pylint: disable=broad-exception-raised
+            f"No mapping found for {class_name}"
+        ) from ex
 
 
 class ObjectUpdater:
@@ -151,17 +170,19 @@ class ObjectUpdater:
     ) -> None:
         session = Session(bind=connection)
 
-        # add `owner:` tags
-        cls._add_owners(session, target)
+        try:
+            # add `owner:` tags
+            cls._add_owners(session, target)
 
-        # add `type:` tags
-        tag = get_tag(f"type:{cls.object_type}", session, TagTypes.type)
-        tagged_object = TaggedObject(
-            tag_id=tag.id, object_id=target.id, object_type=cls.object_type
-        )
-        session.add(tagged_object)
-
-        session.commit()
+            # add `type:` tags
+            tag = get_tag(f"type:{cls.object_type}", session, TagTypes.type)
+            tagged_object = TaggedObject(
+                tag_id=tag.id, object_id=target.id, object_type=cls.object_type
+            )
+            session.add(tagged_object)
+            session.commit()
+        finally:
+            session.close()
 
     @classmethod
     def after_update(
@@ -172,25 +193,27 @@ class ObjectUpdater:
     ) -> None:
         session = Session(bind=connection)
 
-        # delete current `owner:` tags
-        query = (
-            session.query(TaggedObject.id)
-            .join(Tag)
-            .filter(
-                TaggedObject.object_type == cls.object_type,
-                TaggedObject.object_id == target.id,
-                Tag.type == TagTypes.owner,
+        try:
+            # delete current `owner:` tags
+            query = (
+                session.query(TaggedObject.id)
+                .join(Tag)
+                .filter(
+                    TaggedObject.object_type == cls.object_type,
+                    TaggedObject.object_id == target.id,
+                    Tag.type == TagTypes.owner,
+                )
             )
-        )
-        ids = [row[0] for row in query]
-        session.query(TaggedObject).filter(TaggedObject.id.in_(ids)).delete(
-            synchronize_session=False
-        )
+            ids = [row[0] for row in query]
+            session.query(TaggedObject).filter(TaggedObject.id.in_(ids)).delete(
+                synchronize_session=False
+            )
 
-        # add `owner:` tags
-        cls._add_owners(session, target)
-
-        session.commit()
+            # add `owner:` tags
+            cls._add_owners(session, target)
+            session.commit()
+        finally:
+            session.close()
 
     @classmethod
     def after_delete(
@@ -201,13 +224,16 @@ class ObjectUpdater:
     ) -> None:
         session = Session(bind=connection)
 
-        # delete row from `tagged_objects`
-        session.query(TaggedObject).filter(
-            TaggedObject.object_type == cls.object_type,
-            TaggedObject.object_id == target.id,
-        ).delete()
+        try:
+            # delete row from `tagged_objects`
+            session.query(TaggedObject).filter(
+                TaggedObject.object_type == cls.object_type,
+                TaggedObject.object_id == target.id,
+            ).delete()
 
-        session.commit()
+            session.commit()
+        finally:
+            session.close()
 
 
 class ChartUpdater(ObjectUpdater):
@@ -248,35 +274,40 @@ class FavStarUpdater:
         cls, _mapper: Mapper, connection: Connection, target: FavStar
     ) -> None:
         session = Session(bind=connection)
-        name = f"favorited_by:{target.user_id}"
-        tag = get_tag(name, session, TagTypes.favorited_by)
-        tagged_object = TaggedObject(
-            tag_id=tag.id,
-            object_id=target.obj_id,
-            object_type=get_object_type(target.class_name),
-        )
-        session.add(tagged_object)
-
-        session.commit()
+        try:
+            name = f"favorited_by:{target.user_id}"
+            tag = get_tag(name, session, TagTypes.favorited_by)
+            tagged_object = TaggedObject(
+                tag_id=tag.id,
+                object_id=target.obj_id,
+                object_type=get_object_type(target.class_name),
+            )
+            session.add(tagged_object)
+            session.commit()
+        finally:
+            session.close()
 
     @classmethod
     def after_delete(
         cls, _mapper: Mapper, connection: Connection, target: FavStar
     ) -> None:
         session = Session(bind=connection)
-        name = f"favorited_by:{target.user_id}"
-        query = (
-            session.query(TaggedObject.id)
-            .join(Tag)
-            .filter(
-                TaggedObject.object_id == target.obj_id,
-                Tag.type == TagTypes.favorited_by,
-                Tag.name == name,
+        try:
+            name = f"favorited_by:{target.user_id}"
+            query = (
+                session.query(TaggedObject.id)
+                .join(Tag)
+                .filter(
+                    TaggedObject.object_id == target.obj_id,
+                    Tag.type == TagTypes.favorited_by,
+                    Tag.name == name,
+                )
             )
-        )
-        ids = [row[0] for row in query]
-        session.query(TaggedObject).filter(TaggedObject.id.in_(ids)).delete(
-            synchronize_session=False
-        )
+            ids = [row[0] for row in query]
+            session.query(TaggedObject).filter(TaggedObject.id.in_(ids)).delete(
+                synchronize_session=False
+            )
 
-        session.commit()
+            session.commit()
+        finally:
+            session.close()

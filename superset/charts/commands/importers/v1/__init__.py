@@ -22,10 +22,10 @@ from sqlalchemy.orm import Session
 
 from superset.charts.commands.exceptions import ChartImportError
 from superset.charts.commands.importers.v1.utils import import_chart
-from superset.charts.dao import ChartDAO
 from superset.charts.schemas import ImportV1ChartSchema
 from superset.commands.importers.v1 import ImportModelsCommand
 from superset.connectors.sqla.models import SqlaTable
+from superset.daos.chart import ChartDAO
 from superset.databases.commands.importers.v1.utils import import_database
 from superset.databases.schemas import ImportV1DatabaseSchema
 from superset.datasets.commands.importers.v1.utils import import_dataset
@@ -95,6 +95,6 @@ class ImportChartsCommand(ImportModelsCommand):
                 config["params"].update({"datasource": dataset.uid})
 
                 if "query_context" in config:
-                    del config["query_context"]
+                    config["query_context"] = None
 
                 import_chart(session, config, overwrite=overwrite)

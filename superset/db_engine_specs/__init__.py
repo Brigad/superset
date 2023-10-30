@@ -37,11 +37,11 @@ from typing import Any, Optional
 
 import sqlalchemy.databases
 import sqlalchemy.dialects
-from pkg_resources import iter_entry_points
+from importlib_metadata import entry_points
 from sqlalchemy.engine.default import DefaultDialect
 from sqlalchemy.engine.url import URL
 
-from superset import app
+from superset import app, feature_flag_manager
 from superset.db_engine_specs.base import BaseEngineSpec
 
 logger = logging.getLogger(__name__)
@@ -74,7 +74,7 @@ def load_engine_specs() -> list[type[BaseEngineSpec]]:
             if is_engine_spec(getattr(module, attr))
         )
     # load additional engines from external modules
-    for ep in iter_entry_points("superset.db_engine_specs"):
+    for ep in entry_points(group="superset.db_engine_specs"):
         try:
             engine_spec = ep.load()
         except Exception:  # pylint: disable=broad-except
@@ -120,6 +120,7 @@ backend_replacements = {
 }
 
 
+# pylint: disable=too-many-branches
 def get_available_engine_specs() -> dict[type[BaseEngineSpec], set[str]]:
     """
     Return available engine specs and installed drivers for them.
@@ -150,7 +151,7 @@ def get_available_engine_specs() -> dict[type[BaseEngineSpec], set[str]]:
                 drivers[attr].add(attribute.dialect.driver)
 
     # installed 3rd-party dialects
-    for ep in iter_entry_points("sqlalchemy.dialects"):
+    for ep in entry_points(group="sqlalchemy.dialects"):
         try:
             dialect = ep.load()
         except Exception as ex:  # pylint: disable=broad-except
@@ -172,6 +173,8 @@ def get_available_engine_specs() -> dict[type[BaseEngineSpec], set[str]]:
 
         # do not add denied db engine specs to available list
         dbs_denylist = app.config["DBS_AVAILABLE_DENYLIST"]
+        if not feature_flag_manager.is_feature_enabled("ENABLE_SUPERSET_META_DB"):
+            dbs_denylist["superset"] = {""}
         dbs_denylist_engines = dbs_denylist.keys()
 
         if (
