@@ -22,7 +22,7 @@ ARG PY_VER=3.9-slim-bookworm
 
 # if BUILDPLATFORM is null, set it to 'amd64' (or leave as is otherwise).
 ARG BUILDPLATFORM=${BUILDPLATFORM:-amd64}
-FROM --platform=${BUILDPLATFORM} nikolaik/python-nodejs:python3.8-nodejs16-slim AS superset-node
+FROM --platform=${BUILDPLATFORM} nikolaik/python-nodejs:python3.9-nodejs16-slim AS superset-node
 
 ARG NPM_BUILD_CMD="build"
 ENV BUILD_CMD=${NPM_BUILD_CMD}
